@@ -79,9 +79,7 @@ const LoginPage = () => {
         }
       }, 100) // Short delay to ensure context updates
 
-    } catch (err: unknown) {
-      console.error('Login error:', err)
-      
+    } catch (err: unknown) {      
       // Handle Axios errors
       if (err instanceof AxiosError) {
         const errorData = err.response?.data as unknown as { message?: string; error?: string }

@@ -1,4 +1,4 @@
-// app/api/auth.ts
+
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { 
   AuthResponse, 
@@ -24,8 +24,6 @@ const AUTH_ENDPOINTS = {
   CHANGE_PASSWORD: '/auth/change-password',
   UPDATE_PROFILE: '/auth/update-profile',
   NIN_VERIFICATION: '/auth/verify-nin',
-  CHECK_EMAIL: '/auth/check-email',
-  REFRESH_TOKEN: '/auth/refresh-token'
 } as const;
 
 // Error response type
@@ -88,7 +86,6 @@ api.interceptors.request.use(
     return config;
   },
   (error: AxiosError) => {
-    console.error('Request error:', error);
     return Promise.reject(error);
   }
 );
@@ -97,36 +94,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ErrorResponse>) => {
-    const originalRequest = error.config;
     
-    // Only attempt refresh for 401 errors and not already retrying
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      try {
-        // Attempt to refresh token
-        const refreshResponse = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}${AUTH_ENDPOINTS.REFRESH_TOKEN}`,
-          {},
-          { withCredentials: true }
-        );
-        
-        if (refreshResponse.data.token) {
-          // Store new token
-          cookieService.set('accessToken', refreshResponse.data.token, 7);
-          
-          // Retry original request with new token
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.token}`;
-          }
-          return api(originalRequest);
-        }
-      } catch (refreshError) {
-        console.warn('Token refresh failed, logging out:', refreshError);
-        // Refresh failed, proceed with logout
-        await handleClientSideLogout();
-      }
-    }
 
     // Handle other error cases
     if (error.code === 'ECONNABORTED') {
@@ -150,6 +118,8 @@ api.interceptors.response.use(
           .join('; ');
         throw new AuthError(errorMessage, status);
       }
+      
+      throw error;
       
     } else if (error.request) {
       throw new AuthError('No response received from server. Please check your connection.');
@@ -206,39 +176,59 @@ class AuthService {
       
       return this.extractData(response);
     } catch (error: unknown) {
-      console.error('Registration error:', error);
       throw error;
     }
   }
 
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    try {
-      const response = await api.post<AuthResponse>(AUTH_ENDPOINTS.LOGIN, {
-        email: credentials.email,
-        password: credentials.password
-      });
-
-      // Store token if present in response
-      if (response.data.accessToken) {
-        cookieService.set('accessToken', response.data.accessToken, 7);
-        if (credentials.rememberMe) {
-          localStorage.setItem('rememberMe', 'true');
-        }
+async login(credentials: LoginCredentials): Promise<AuthResponse> {
+  try {
+    
+    const response = await api.post<AuthResponse>(AUTH_ENDPOINTS.LOGIN, {
+      email: credentials.email,
+      password: credentials.password
+    });
+    if (response.data.accessToken) {
+      cookieService.set('accessToken', response.data.accessToken, 7);
+      if (credentials.rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
       }
-
-      return this.extractData(response);
-    } catch (error: unknown) {
-      console.error('Login error:', error);
+      return response.data;
+    } else {
+      const errorMessage = response.data.message || 'Login failed';
+      throw new Error(errorMessage);
+    }
+    
+  } catch (error: unknown) {    
+    if (error instanceof AxiosError) {
+      if (error.response) {        
+        const errorMessage = error.response.data?.message || 
+                            error.response.data?.error || 
+                            `Login failed (${error.response.status})`;
+        throw new Error(errorMessage);
+      } else if (error.request) {
+        // The request was made but no response was received
+        throw new Error('No response from server. Please check your connection.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        throw new Error(error.message || 'Login failed. Please try again.');
+      }
+    }
+    
+    if (error instanceof Error) {
       throw error;
     }
+    
+    throw new Error('An unexpected error occurred');
   }
+}
 
   async logout(): Promise<void> {
     try {
       await api.post(AUTH_ENDPOINTS.LOGOUT);
     } catch (error: unknown) {
-      console.warn('Logout request failed:', error);
-    } finally {
+    if (error instanceof Error) {
+    throw error;
+    }    } finally {
       // Always clear client-side tokens
       handleClientSideLogout();
     }
@@ -259,9 +249,7 @@ async getCurrentUser(): Promise<User | null> {
 
     return userData;
     
-  } catch (error: unknown) {
-    console.error('Error fetching current user:', error);
-    
+  } catch (error: unknown) {    
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
       
@@ -289,8 +277,9 @@ async getCurrentUser(): Promise<User | null> {
       const response = await api.get(`/admin/users?${queryParams.toString()}`)
       return response.data
     } catch (error) {
-      console.error('Error fetching users:', error)
-      return {
+    if (error instanceof Error) {
+      throw error;
+    }      return {
         success: false,
         message: 'Failed to fetch users'
       }
@@ -302,7 +291,9 @@ async getCurrentUser(): Promise<User | null> {
       const response = await api.get(`/admin/users/${userId}`)
       return response.data
     } catch (error) {
-      console.error(`Error fetching user ${userId}:`, error)
+      if (error instanceof Error) {
+        throw error;
+      }
       return {
         success: false,
         message: 'Failed to fetch user details'
@@ -315,7 +306,9 @@ async getCurrentUser(): Promise<User | null> {
       const response = await api.put(`/admin/users/${userId}/status`, { isActive, reason })
       return response.data
     } catch (error) {
-      console.error(`Error updating user ${userId} status:`, error)
+      if (error instanceof Error) {
+        throw error;
+      }
       return {
         success: false,
         message: 'Failed to update user status'
@@ -328,7 +321,9 @@ async getCurrentUser(): Promise<User | null> {
       const response = await api.patch(`/admin/users/${userId}/verify`, { verified, notes })
       return response.data
     } catch (error) {
-      console.error(`Error verifying KYC for user ${userId}:`, error)
+      if (error instanceof Error) {
+        throw error;
+      }
       return {
         success: false,
         message: 'Failed to verify KYC'
@@ -341,8 +336,9 @@ async getCurrentUser(): Promise<User | null> {
       const response = await api.post('admin/register-admin', userData)
       return response.data
     } catch (error) {
-      console.error('Error creating admin:', error)
-      return {
+    if (error instanceof Error) {
+      throw error;
+    }      return {
         success: false,
         message: 'Failed to create admin'
       }
@@ -364,8 +360,9 @@ async getCurrentUser(): Promise<User | null> {
 
       return this.extractData(response);
     } catch (error: unknown) {
-      console.error('Email verification error:', error);
+    if (error instanceof Error) {
       throw error;
+    }      throw error;
     }
   }
 
@@ -377,8 +374,10 @@ async getCurrentUser(): Promise<User | null> {
       );
       return this.extractData(response);
     } catch (error: unknown) {
-      console.error('Resend OTP error:', error);
-      throw error;
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to resend OTP');
     }
   }
 
@@ -390,8 +389,9 @@ async getCurrentUser(): Promise<User | null> {
       );
       return this.extractData(response);
     } catch (error: unknown) {
-      console.error('Forgot password error:', error);
+    if (error instanceof Error) {
       throw error;
+    }      throw error;
     }
   }
 
@@ -407,8 +407,10 @@ async resetPassword(email: string, otp: string, newPassword: string): Promise<{ 
     );
     return this.extractData(response);
   } catch (error: unknown) {
-    console.error('Reset password error:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to reset password');
   }
 }
 
@@ -420,8 +422,10 @@ async resetPassword(email: string, otp: string, newPassword: string): Promise<{ 
       );
       return this.extractData(response);
     } catch (error: unknown) {
-      console.error('Change password error:', error);
-      throw error;
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to change password');
     }
   }
 
@@ -433,37 +437,10 @@ async resetPassword(email: string, otp: string, newPassword: string): Promise<{ 
       );
       return this.extractData(response);
     } catch (error: unknown) {
-      console.error('Profile update error:', error);
-      throw error;
-    }
-  }
-
-  async checkEmailAvailability(email: string): Promise<{ available: boolean }> {
-    try {
-      const response = await api.post<{ available: boolean }>(
-        AUTH_ENDPOINTS.CHECK_EMAIL, 
-        { email }
-      );
-      return this.extractData(response);
-    } catch (error: unknown) {
-      console.error('Email availability check error:', error);
-      throw error;
-    }
-  }
-
-  async refreshToken(): Promise<{ token: string }> {
-    try {
-      const response = await api.post<{ token: string }>(AUTH_ENDPOINTS.REFRESH_TOKEN);
-      
-      // Update stored token
-      if (response.data.token) {
-        cookieService.set('accessToken', response.data.token, 7);
+      if (error instanceof Error) {
+        throw error;
       }
-      
-      return this.extractData(response);
-    } catch (error: unknown) {
-      console.error('Token refresh error:', error);
-      throw error;
+      throw new Error('Failed to update profile');
     }
   }
 

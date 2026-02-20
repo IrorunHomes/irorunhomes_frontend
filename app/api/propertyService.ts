@@ -294,8 +294,9 @@ class PropertyService {
       const response = await authApi.get<ApiResponse<PropertiesResponse>>(`/all-properties`);
       return this.handleResponse<PropertiesResponse>(response);
     } catch (error) {
-      console.error('Error fetching admin all properties:', error);
+    if (error instanceof Error) {
       throw error;
+    }      throw error;
     }
   }
 
@@ -308,13 +309,15 @@ class PropertyService {
       const response = await authApi.get<ApiResponse<PropertyResponse>>(`/property/${id}`);
       return this.handleResponse<PropertyResponse>(response);
     } catch (error) {
-      console.error(`Error fetching admin property ${id}:`, error);
+      if (error instanceof Error) {
+        throw error;
+      }
+    if (error instanceof Error) {
       throw error;
+    }      throw error;
     }
   }
 
-  // Updates an existing property - REQUIRES TOKEN
-  // Note: Your backend update endpoint might expect different structure than create
   async updateProperty(
     id: string, 
     formData: FormData
@@ -323,15 +326,6 @@ class PropertyService {
       if (!id) {
         throw new Error('Property ID is required');
       }      
-      // Debug: Show what's being sent for update
-      console.log('📋 Update FormData:');
-      for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`  ${key}: File (${value.name})`);
-        } else {
-          console.log(`  ${key}: ${value}`);
-        }
-      }
             
       const response = await authApi.put<ApiResponse<{ updatedProperty: Property }>>(
         `/update-property/${id}`, 
@@ -352,8 +346,9 @@ class PropertyService {
       return result;
       
     } catch (error) {
-      console.error(`Error updating property ${id}:`, error);
-      
+    if (error instanceof Error) {
+      throw error;
+    }      
       if (error instanceof AxiosError) {
         console.error('Axios error details:', {
           status: error.response?.status,
