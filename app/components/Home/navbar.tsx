@@ -220,18 +220,18 @@ const Navbar = () => {
             
             {/* Mobile CTA Buttons */}
             <div className="pt-4 mt-2 border-t border-gray-200 flex flex-col space-y-3">
-              <button className="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-700 text-white font-medium rounded-lg hover:opacity-90 transition shadow-lg flex items-center justify-center">
+              <Link href="/auth/login" className="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-700 text-white font-medium rounded-lg hover:opacity-90 transition shadow-lg flex items-center justify-center">
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                 </svg>
                 Sign In
-              </button>
-              <button className="w-full py-3 bg-white text-emerald-700 font-medium rounded-lg border border-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center shadow-sm">
+              </Link>
+              <Link href="/properties" className="w-full py-3 bg-white text-emerald-700 font-medium rounded-lg border border-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center shadow-sm">
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 Find Properties
-              </button>
+              </Link>
             </div>
           </div>
         </div>
