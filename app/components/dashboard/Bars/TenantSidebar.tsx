@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import logo from "../../../../public/sackagent-logo.png";
+import logo from "../../../../public/irorun-logo.png";
 import Image from "next/image";
 import {
   HomeIcon,
@@ -14,7 +14,6 @@ import {
   DocumentCheckIcon,
   QuestionMarkCircleIcon,
   CheckCircleIcon,
-  ArrowPathIcon,
   Bars3Icon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
@@ -181,7 +180,7 @@ export default function TenantSidebar({ onTabChange }: SidebarProps) {
               <Link href="/dashboard/tenant" className="flex items-center justify-center px-4">
                 <Image 
                   src={logo} 
-                  alt="SackAgent" 
+                  alt="Irorun Homes Logo" 
                   className="w-24 sm:w-28 md:w-32 h-auto transition-all duration-300" 
                   priority
                 />
@@ -214,7 +213,7 @@ export default function TenantSidebar({ onTabChange }: SidebarProps) {
               <div className="text-center">
                 <p className="text-xs text-white/70">v1.0.0 • Tenant Panel</p>
                 <p className="text-[10px] text-white/50 mt-2">
-                  © {new Date().getFullYear()} SackAgent
+                  © {new Date().getFullYear()} Irorun Homes
                 </p>
               </div>
             </div>
@@ -249,7 +248,7 @@ export default function TenantSidebar({ onTabChange }: SidebarProps) {
           <Link href="/dashboard/tenant" className="flex items-center" onClick={() => setMobileOpen(false)}>
             <Image 
               src={logo} 
-              alt="SackAgent" 
+              alt="Irorun Homes Logo" 
               className="w-28 h-auto" 
               priority
             />
@@ -272,7 +271,7 @@ export default function TenantSidebar({ onTabChange }: SidebarProps) {
           <div className="text-center">
             <p className="text-xs text-white/70">v1.0.0 • Tenant Panel</p>
             <p className="text-[10px] text-white/50 mt-2">
-              © {new Date().getFullYear()} SackAgent
+              © {new Date().getFullYear()} Irorun Homes
             </p>
           </div>
         </div>

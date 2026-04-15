@@ -226,7 +226,7 @@ const SearchBar = () => {
             {/* Price Range */}
             <div>
               <label className="block text-sm font-medium text-emerald-700 mb-2">
-                Price Range ($)
+                Price Range (#)
               </label>
               <div className="flex space-x-2">
                 <div className="relative flex-1">
@@ -239,7 +239,7 @@ const SearchBar = () => {
                     min="0"
                     step="100"
                   />
-                  <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">$</span>
+                  <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">#</span>
                 </div>
                 <div className="relative flex-1">
                   <input
@@ -251,7 +251,7 @@ const SearchBar = () => {
                     min="0"
                     step="100"
                   />
-                  <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">$</span>
+                  <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">#</span>
                 </div>
               </div>
             </div>
@@ -266,19 +266,19 @@ const SearchBar = () => {
                   onClick={() => setPriceRange({ min: '0', max: '1000' })}
                   className="px-3 py-1.5 text-xs border border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
                 >
-                  Under $1,000
+                  Under #1,000
                 </button>
                 <button
                   onClick={() => setPriceRange({ min: '1000', max: '2000' })}
                   className="px-3 py-1.5 text-xs border border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
                 >
-                  $1,000 - $2,000
+                  #1,000 - #2,000
                 </button>
                 <button
                   onClick={() => setPriceRange({ min: '2000', max: '3000' })}
                   className="px-3 py-1.5 text-xs border border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
                 >
-                  $2,000 - $3,000
+                  #2,000 - #3,000
                 </button>
               </div>
             </div>
@@ -322,7 +322,7 @@ const SearchBar = () => {
               )}
               {priceRange.min && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">
-                  Min: ${priceRange.min}
+                  Min: #{priceRange.min}
                   <button
                     onClick={() => setPriceRange(prev => ({ ...prev, min: '' }))}
                     className="ml-2 text-green-500 hover:text-green-700"
@@ -333,7 +333,7 @@ const SearchBar = () => {
               )}
               {priceRange.max && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">
-                  Max: ${priceRange.max}
+                  Max: #{priceRange.max}
                   <button
                     onClick={() => setPriceRange(prev => ({ ...prev, max: '' }))}
                     className="ml-2 text-green-500 hover:text-green-700"

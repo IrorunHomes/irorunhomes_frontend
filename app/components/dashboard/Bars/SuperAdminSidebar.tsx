@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import logo from "../../../../public/sackagent-logo.png";
+import logo from "../../../../public/irorun-logo.png";
 import Image from "next/image";
 import {
   HomeIcon,
@@ -194,7 +194,7 @@ export default function SuperAdminSidebar({ onTabChange }: SidebarProps) {
               <Link href="/dashboard/super-admin" className="flex items-center justify-center px-4">
                 <Image 
                   src={logo} 
-                  alt="SackAgent" 
+                  alt="Irorun Homes Logo" 
                   className="w-24 sm:w-28 md:w-32 h-auto transition-all duration-300" 
                   priority
                 />
@@ -224,7 +224,7 @@ export default function SuperAdminSidebar({ onTabChange }: SidebarProps) {
               <div className="text-center">
                 <p className="text-xs text-white/70">v1.0.0 • Super Admin</p>
                 <p className="text-[10px] text-white/50 mt-2">
-                  © {new Date().getFullYear()} SackAgent
+                  © {new Date().getFullYear()} Irorun Homes
                 </p>
               </div>
             </div>
@@ -249,7 +249,7 @@ export default function SuperAdminSidebar({ onTabChange }: SidebarProps) {
       }`}>
         <div className="flex items-center justify-between p-4 border-b border-emerald-800">
           <Link href="/dashboard/super-admin" className="flex items-center" onClick={() => setMobileOpen(false)}>
-            <Image src={logo} alt="SackAgent" className="w-28 h-auto" priority />
+            <Image src={logo} alt="Irorun Homes" className="w-28 h-auto" priority />
           </Link>
           <button onClick={() => setMobileOpen(false)} className="p-2 hover:bg-emerald-800/50 rounded-lg">
             <XMarkIcon className="w-5 h-5 text-white" />
@@ -261,7 +261,7 @@ export default function SuperAdminSidebar({ onTabChange }: SidebarProps) {
         <div className="absolute bottom-6 left-0 right-0 px-4">
           <div className="text-center">
             <p className="text-xs text-white/70">v1.0.0 • Super Admin</p>
-            <p className="text-[10px] text-white/50 mt-2">© {new Date().getFullYear()} SackAgent</p>
+            <p className="text-[10px] text-white/50 mt-2">© {new Date().getFullYear()} Irorun Homes</p>
           </div>
         </div>
       </aside>

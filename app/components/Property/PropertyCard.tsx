@@ -47,20 +47,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     minimumFractionDigits: 0
   }).format(property.price)
 
-  // Format date
-  const formatDate = (date: Date) => {
-    const now = new Date()
-    const listedDate = new Date(date)
-    const diffTime = Math.abs(now.getTime() - listedDate.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays === 1) return 'Today'
-    if (diffDays === 2) return 'Yesterday'
-    if (diffDays < 7) return `${diffDays} days ago`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-    return listedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  }
-
   return (
     <div 
       className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer border border-gray-100 hover:border-emerald-200"

@@ -1,4 +1,4 @@
-// app/(auth)/verify-otp/page.tsx
+
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -352,8 +352,8 @@ const VerifyOTPPage = () => {
             <h4 className="text-sm font-medium text-emerald-800 mb-2">Need help?</h4>
             <p className="text-sm text-emerald-700">
               Check your spam folder or contact{' '}
-              <a href="mailto:support@sackagent.com" className="font-medium underline">
-                support@sackagent.com
+              <a href="mailto:support@irorunhomes.com" className="font-medium underline">
+                support@irorunhomes.com
               </a>
             </p>
             <p className="text-sm text-emerald-600 mt-2">

@@ -1,4 +1,4 @@
-// app/(auth)/register/page.tsx
+
 'use client'
 
 import React, { useState } from 'react'
@@ -505,7 +505,7 @@ const RegisterPage = () => {
                       </div>
                       <div className="ml-3 text-sm">
                         <label htmlFor="newsletter" className="text-gray-700">
-                          I want to receive updates, offers, and news from SackAgent
+                          I want to receive updates, offers, and news from Irorun Homes
                         </label>
                       </div>
                     </div>

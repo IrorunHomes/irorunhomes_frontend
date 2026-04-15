@@ -1,19 +1,19 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import logo from "../../../public/sackagent-logo.png";
+import logo from "../../../public/irorun-logo.png";
 import Image from "next/image";
 import Link from "next/link";
 
-export const SackAgentLogo = () => (
+export const IrorunHomesLogo = () => (
   <Link href="/" className="flex items-center space-x-2">
     <Image 
       src={logo} 
-      alt="SackAgent" 
-      className="w-24 h-auto sm:w-28 md:w-32 transition-all duration-300" 
+      alt="Irorun Homes Logo" 
+      className="w-20 h-auto sm:w-28 md:w-32 transition-all duration-300 mr-0" 
       priority
     />
-    <p className="font-bold text-emerald-700 text-2xl">SackAgent</p>
+    <p className="font-bold text-emerald-700 text-lg sm:text-xl md:text-">Irorun Homes</p>
   </Link>
 );
 
@@ -52,7 +52,7 @@ const Navbar = () => {
         
         {/* Logo - Left aligned */}
         <div className="flex-shrink-0 ">
-          <SackAgentLogo />
+          <IrorunHomesLogo />
         </div>
 
         {/* Desktop Navigation Links - Center aligned */}

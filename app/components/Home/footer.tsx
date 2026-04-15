@@ -2,18 +2,18 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image';
-import logo from "../../../public/sackagent-logo.png";
+import logo from "../../../public/irorun-logo.png";
 
 
-export const SackAgentLogo = () => (
+export const IrorunHomesLogo = () => (
   <Link href="/" className="flex flex-col items-center space-x-2">
     <Image 
       src={logo} 
-      alt="SackAgent" 
+      alt="Irorun Homes Logo" 
       className="w-24 h-auto sm:w-28 md:w-32 transition-all duration-300" 
       priority
     />
-    <p className="font-bold text-2xl">SackAgent</p>
+    <p className="font-bold text-2xl">Irorun Homes</p>
   </Link>
 );
 
@@ -27,7 +27,7 @@ const Footer = () => {
           <div className="space-y-4">
         {/* Logo - Left aligned */}
         <div className="flex-shrink-0 ">
-          <SackAgentLogo />
+          <IrorunHomesLogo />
         </div>
             <div className="flex space-x-2 ml-16">
               <a href="#" className="text-emerald-300 hover:text-white transition-colors">
@@ -102,7 +102,7 @@ const Footer = () => {
                 <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <a href="mailto:hello@sackagent.com" className="text-emerald-100 hover:text-white transition-colors">sackagentng@gmail.com</a>
+                <a href="mailto:hello@irorunhomes.com" className="text-emerald-100 hover:text-white transition-colors">irorunhomes@gmail.com</a>
               </li>
             </ul>
             
@@ -123,7 +123,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="text-emerald-200 text-sm flex justify-center items-center mt-14">
-          © {new Date().getFullYear()} SackAgent. All rights reserved. <span>
+          © {new Date().getFullYear()} Irorun Homes & Properties. All rights reserved. <span>
         <Link href="https://quiqerr.com" className="text-emerald-300 hover:text-white transition-colors ml-5">
             Powered by Quiqerr Tech Nigeria
         </Link>

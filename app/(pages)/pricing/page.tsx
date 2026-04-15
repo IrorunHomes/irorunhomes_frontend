@@ -374,7 +374,7 @@ export default function PricingPage() {
           <div className="bg-red-50 rounded-2xl p-8 border-2 border-red-200">
             <h2 className="text-3xl font-bold text-red-800 text-center mb-4">No Hidden Fees. Period.</h2>
             <p className="text-lg text-red-700 text-center mb-8 max-w-3xl mx-auto">
-              We don&apos;t believe in nickel-and-diming our users. Here&apos;s what you&apos;ll NEVER pay with SackAgent:
+              Here&apos;s what you&apos;ll NEVER pay with us:
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">

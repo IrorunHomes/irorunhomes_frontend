@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SackAgent - Your Trusted Property Management Partner",
-  description: "SackAgent - Your Trusted Property Management Partner",
+  title: "Irorun Homes - Your Trusted Property Management Partner",
+  description: "Irorun Homes - Your Trusted Property Management Partner",
 };
 
 export default function RootLayout({

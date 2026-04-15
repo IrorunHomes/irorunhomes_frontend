@@ -1,4 +1,3 @@
-// components/dashboard/QuickActions.tsx
 'use client'
 
 import React from 'react'

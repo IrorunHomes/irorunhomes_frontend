@@ -1,4 +1,4 @@
-// app/(pages)/dashboard/admin/renewals/page.tsx
+
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -12,14 +12,9 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   EyeIcon,
-  UserIcon,
   HomeModernIcon,
-  CalendarIcon,
-  DocumentTextIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   ArrowPathIcon,
-  CurrencyDollarIcon
 } from '@heroicons/react/24/outline'
 import { RentalRequest } from '../../../../types/rentalRequest'
 

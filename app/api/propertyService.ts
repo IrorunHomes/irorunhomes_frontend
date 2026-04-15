@@ -1,4 +1,4 @@
-// services/propertyService.ts
+
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
 import { 
   Property,

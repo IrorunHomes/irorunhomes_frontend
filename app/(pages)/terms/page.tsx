@@ -9,11 +9,11 @@ export default function TermsOfServicePage() {
   const sections = [
     {
       title: '1. Acceptance of Terms',
-      content: 'By accessing or using SackAgent, you agree to be bound by these Terms of Service. If you do not agree to all terms, you may not use our services.'
+      content: 'By accessing or using Irorun Homes & Properties, you agree to be bound by these Terms of Service. If you do not agree to all terms, you may not use our services.'
     },
     {
       title: '2. Description of Service',
-      content: 'SackAgent provides a platform connecting property owners/landlords with potential tenants. We facilitate property listings, rental applications, payments, and lease management.'
+      content: 'Irorun Homes & Properties provides a platform connecting property owners/landlords with potential tenants. We facilitate property listings, rental applications, payments, and lease management.'
     },
     {
       title: '3. User Accounts',
@@ -68,11 +68,11 @@ export default function TermsOfServicePage() {
     },
     {
       title: '8. Intellectual Property',
-      content: 'All content on SackAgent, including logos, designs, and software, is owned by us or our licensors. You may not use our intellectual property without permission.'
+      content: 'All content on Irorun Homes & Properties, including logos, designs, and software, is owned by us or our licensors. You may not use our intellectual property without permission.'
     },
     {
       title: '9. Limitation of Liability',
-      content: 'To the maximum extent permitted by law, SackAgent shall not be liable for any indirect, incidental, or consequential damages arising from your use of our services.'
+      content: 'To the maximum extent permitted by law, Irorun Homes & Properties shall not be liable for any indirect, incidental, or consequential damages arising from your use of our services.'
     },
     {
       title: '10. Dispute Resolution',
@@ -113,8 +113,8 @@ export default function TermsOfServicePage() {
       <section className="py-12 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-lg text-gray-700 leading-relaxed">
-            Welcome to SackAgent. These terms govern your use of our platform and services. 
-            Please read them carefully before using SackAgent.
+            Welcome to Irorun Homes & Properties. These terms govern your use of our platform and services. 
+            Please read them carefully before using Irorun Homes & Properties.
           </p>
         </div>
       </section>

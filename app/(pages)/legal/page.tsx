@@ -24,7 +24,7 @@ export default function LegalPage() {
     },
     {
       title: 'Property Listing Agreement',
-      description: 'Agreement between property owner and SackAgent for listing services.',
+      description: 'Agreement between property owner and Irorun Homes for listing services.',
       icon: BuildingOfficeIcon,
       downloadUrl: '/docs/listing-agreement.pdf',
       lastUpdated: 'January 2024'

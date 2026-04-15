@@ -176,7 +176,7 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
           {/* Page Title - Hidden on mobile */}
           <div className="hidden md:block">
               <p className="text-emerald-600 font-bold text-3xl mt-1 pl-10">
-                SackAgent
+                Irorun Homes
               </p>
           </div>
 

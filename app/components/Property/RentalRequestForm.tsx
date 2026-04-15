@@ -1,4 +1,4 @@
-// components/RentalRequestForm.tsx
+
 'use client'
 
 import React, { useState } from 'react'
@@ -77,7 +77,7 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
     const newErrors: Record<string, string> = {}
 
     if (!formData.message.trim()) {
-      newErrors.message = 'Please provide a brief message to SackAgent'
+      newErrors.message = 'Please provide a brief message to Irorun Homes & Properties'
     } else if (formData.message.trim().length < 10) {
       newErrors.message = 'Message must be at least 10 characters'
     } else if (formData.message.trim().length > 500) {
@@ -194,7 +194,7 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
             <p className="text-xs text-amber-800 flex items-start">
               <ShieldCheckIcon className="w-4 h-4 mr-1 flex-shrink-0 mt-0.5" />
               <span>
-                <span className="font-bold">Important:</span> SackAgent will never request payment before an inspection. 
+                <span className="font-bold">Important:</span> Irorun Homes & Properties will never request payment before an inspection. 
                 Please report any suspicious requests to our support team.
               </span>
             </p>
@@ -306,7 +306,7 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
       {/* Message - Enhanced */}
       <div className="space-y-2">
         <label htmlFor="message" className="block text-sm font-semibold text-gray-800">
-          Message to SackAgent <span className="text-red-500">*</span>
+          Message to Irorun Homes & Properties <span className="text-red-500">*</span>
         </label>
         <div className="relative group">
           <div className="absolute left-3 top-3">
@@ -499,7 +499,7 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
       
       {/* Disclaimer */}
       <p className="text-xs text-gray-400 text-center">
-        By submitting this request, you agree to be contacted by SackAgent regarding your rental inquiry.
+        By submitting this request, you agree to be contacted by Irorun Homes & Properties regarding your rental inquiry.
       </p>
     </form>
   )

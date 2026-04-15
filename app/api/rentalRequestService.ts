@@ -1,4 +1,4 @@
-// services/rentalRequestService.ts
+
 import axios, { AxiosInstance, AxiosError } from 'axios'
 import { cookieService } from '../lib/cookies'
 import { RentalRequest, SubmitRequestPayload, ApiResponse, UploadPaymentReceiptPayload, SetAutoRenewalPayload, RequestRenewalPayload, RegisterAdminPayload, PaginationParams, ProcessRentalRequestPayload, VerifyPaymentPayload, RenewLeasePayload, ProcessRenewalPayload } from '../types/rentalRequest'

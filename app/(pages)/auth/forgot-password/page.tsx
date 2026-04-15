@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import { useUser } from '../../../context/UserContext'
-import logo from '../../../../public/sackagent-logo.png'
+import logo from '../../../../public/irorun-logo.png'
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link href="/" className="flex justify-center">
-          <Image src={logo} alt="SackAgent" className="h-12 w-auto" />
+          <Image src={logo} alt="Irorun Homes Logo" className="h-12 w-auto" />
         </Link>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
           Forgot your password?

@@ -46,7 +46,7 @@ export default function ContactPage() {
       city: 'Osun',
       address: 'Osogbo, Osun State',
       phone: '+234 123 456 7890',
-      email: 'osun@sackagent.com',
+      email: 'info@irorunhomes.com',
       hours: 'Mon-Fri: 8am - 6pm, Sat: 9am - 2pm'
     }
   ]
@@ -75,8 +75,8 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Us</h3>
               <p className="text-gray-600 mb-4">24/7 Support</p>
-              <a href="mailto:support@sackagent.com" className="text-emerald-600 hover:text-emerald-800 font-medium">
-                support@sackagent.com
+              <a href="mailto:support@irorunhomes.com" className="text-emerald-600 hover:text-emerald-800 font-medium">
+                support@irorunhomes.com
               </a>
             </div>
 

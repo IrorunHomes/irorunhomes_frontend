@@ -114,7 +114,7 @@ export default function PrivacyPolicyPage() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Privacy Policy</h1>
           <p className="text-xl text-emerald-100 max-w-3xl mx-auto">
-            Last Updated: February 15, 2024
+            Last Updated: April 15, 2026
           </p>
         </div>
       </section>
@@ -123,7 +123,7 @@ export default function PrivacyPolicyPage() {
       <section className="py-12 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-lg text-gray-700 leading-relaxed">
-            At SackAgent, we take your privacy seriously. This policy describes how we collect, 
+            At Irorun Homes & Properties, we take your privacy seriously. This policy describes how we collect, 
             use, and protect your personal information when you use our platform. By using our 
             services, you consent to the practices described in this policy.
           </p>

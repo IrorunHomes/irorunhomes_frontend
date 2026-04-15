@@ -1,4 +1,4 @@
-// app/(marketing)/about/page.tsx
+
 'use client'
 
 import React from 'react'
@@ -8,7 +8,6 @@ import {
   BuildingOfficeIcon,
   UserGroupIcon,
   ShieldCheckIcon,
-  ChartBarIcon,
   GlobeAltIcon,
   HeartIcon,
   StarIcon,
@@ -92,7 +91,7 @@ export default function AboutPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Our Story</h1>
           <p className="text-xl text-emerald-100 max-w-3xl mx-auto">
-            We&apos;re on a mission to transform the property rental experience in Africa by doing the hard work for property owners and providing verified, scam-free homes for tenants.
+            We&apos;re on a mission to transform the property rental experience in Osun and beyond by doing the hard work for property owners and providing verified, scam-free homes for tenants.
           </p>
         </div>
       </section>
@@ -195,7 +194,7 @@ export default function AboutPage() {
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Our Verification Promise</h2>
           <p className="text-xl text-emerald-100 mb-8 max-w-2xl mx-auto">
-            Every single property on SackAgent is personally verified by our team. We physically inspect each property, meet with the owner, and validate all documents before any listing goes live.
+            Every single property on Irorun Homes & properties is personally verified by our team. We physically inspect each property, meet with the owner, and validate all documents before any listing goes live.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <div className="bg-white/10 rounded-xl p-4">
@@ -292,7 +291,7 @@ export default function AboutPage() {
             </div>
             <div className="flex items-center">
               <EnvelopeIcon className="w-4 h-4 mr-2" />
-              <span>hello@sackagent.com</span>
+              <span>hello@irorunhomes.com</span>
             </div>
           </div>
         </div>

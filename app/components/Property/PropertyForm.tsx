@@ -1,7 +1,6 @@
-// components/dashboard/properties/PropertyForm.tsx
 'use client'
 
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useProperty } from '../../context/PropertyContext'
@@ -20,7 +19,7 @@ import {
   CheckCircleIcon,
   ClockIcon
 } from '@heroicons/react/24/outline'
-import { ApartmentType, PropertyFlatData } from '../../types/property'
+import { ApartmentType } from '../../types/property'
 
 interface PropertyFormProps {
   propertyId?: string // For editing existing property

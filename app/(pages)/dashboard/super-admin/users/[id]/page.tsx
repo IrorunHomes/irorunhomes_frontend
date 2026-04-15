@@ -1,4 +1,3 @@
-// app/(pages)/dashboard/admin/users/[id]/page.tsx
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -10,12 +9,10 @@ import { useAdminRentalRequest } from '../../../../../context/RentalRequestConte
 import { useProperty } from '../../../../../context/PropertyContext'
 import DashboardLayout from '../../../DashboardLayout'
 import {
-  ArrowLeftIcon,
   UserIcon,
   EnvelopeIcon,
   PhoneIcon,
   CalendarIcon,
-  MapPinIcon,
   ShieldCheckIcon,
   IdentificationIcon,
   DocumentTextIcon,
@@ -26,15 +23,12 @@ import {
   ExclamationCircleIcon,
   PencilIcon,
   LockClosedIcon,
-  KeyIcon,
   BuildingOfficeIcon,
   CurrencyDollarIcon,
-  DocumentDuplicateIcon,
   EyeIcon,
   ChartBarIcon,
   CreditCardIcon,
   CheckBadgeIcon,
-  TagIcon
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid'
 import { User } from '../../../../../types/auth'
@@ -70,7 +64,6 @@ const tabs: TabProps[] = [
 
 export default function UserProfilePage() {
   const params = useParams()
-  const router = useRouter()
   const { user: currentUser, fetchUserById, updateUserStatus, verifyUserKYC } = useUser()
   const { fetchApprovedRequests } = useAdminRentalRequest()
   const { fetchAdminProperties } = useProperty()

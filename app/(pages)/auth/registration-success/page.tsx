@@ -25,7 +25,7 @@ const RegistrationSuccessPage = () => {
           </h3>
           
           <p className="mt-4 text-gray-600">
-            Welcome to SackAgent! Your account has been created and is ready to use.
+            Welcome to Irorun Homes & Properties! Your account has been created and is ready to use.
           </p>
 
           <div className="mt-8 space-y-4">
