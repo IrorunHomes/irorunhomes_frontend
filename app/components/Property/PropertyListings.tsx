@@ -32,18 +32,8 @@ const PropertyListings = () => {
   }
 
   return (
-    <section className="py-12 md:py-16 bg-gradient-to-b from-emerald-50 to-white">
+    <section className="py-12 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        {/* Search Bar */}
-        <div className="mb-10 max-w-3xl mx-auto">
-          <SearchBar />
-        </div>
-        <div className="text-center mb-10 md:mb-12">
-          <p className="text-gray-600 text-base md:text-lg max-w-3xl mx-auto">
-            Discover affordable, eco-friendly homes in your Area
-          </p>
-        </div>
-
         {/* Loading State */}
         {loadingProperties ? (
           <div className="flex justify-center items-center py-12">

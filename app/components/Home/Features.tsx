@@ -72,7 +72,7 @@ const Features = () => {
         {/* Header */}
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Hassle-Free Property Management{' '}
+            Stress-Free Property Management{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600">
               For Everyone
             </span>

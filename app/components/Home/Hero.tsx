@@ -50,22 +50,6 @@ const Hero = () => {
         <div className="max-w-4xl mx-auto px-2 sm:px-4">
           <SearchBar />
         </div>
-
-        {/* Stats/Features - Responsive Grid with Glass Effect */}
-        <div className="mt-12 md:mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-4xl mx-auto mb-6">
-          <div className="text-center p-4 sm:p-6 bg-white/10 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 hover:bg-white/15 transition-all duration-300">
-            <div className="text-2xl sm:text-3xl font-bold text-emerald-300 mb-2">500+</div>
-            <div className="text-white text-sm sm:text-base font-medium">Green Properties</div>
-          </div>
-          <div className="text-center p-4 sm:p-6 bg-white/10 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 hover:bg-white/15 transition-all duration-300">
-            <div className="text-2xl sm:text-3xl font-bold text-green-300 mb-2">98%</div>
-            <div className="text-white text-sm sm:text-base font-medium">Tenant Satisfaction</div>
-          </div>
-          <div className="text-center p-4 sm:p-6 bg-white/10 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 hover:bg-white/15 transition-all duration-300">
-            <div className="text-2xl sm:text-3xl font-bold text-teal-300 mb-2">24/7</div>
-            <div className="text-white text-sm sm:text-base font-medium">Eco Support</div>
-          </div>
-        </div>
       </div>
 
       {/* Scroll Indicator for Mobile */}
