@@ -4,7 +4,6 @@
 
 import React, { useEffect, useMemo } from 'react'
 import PropertyCard from './PropertyCard'
-import SearchBar from '../Home/SearchBar'
 import { useProperty } from '../../context/PropertyContext'
 
 const PropertyListings = () => {
