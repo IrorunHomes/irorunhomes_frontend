@@ -13,7 +13,7 @@ export const IrorunHomesLogo = () => (
       className="w-20 h-auto sm:w-28 md:w-32 transition-all duration-300 mr-0" 
       priority
     />
-    <p className="font-bold text-emerald-700 text-lg sm:text-xl md:text-">Irorun Homes</p>
+    <p className="font-bold text-emerald-700 text-lg sm:text-xl md:text-xl">Irorun Homes</p>
   </Link>
 );
 

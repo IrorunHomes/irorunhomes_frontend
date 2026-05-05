@@ -36,14 +36,13 @@ const Hero = () => {
         {/* Main Heading - Optimized for Mobile */}
         <div className="text-center mb-10 md:mb-12">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight drop-shadow-lg">
-            Rent, Buy/Sell, <br className="hidden sm:block" />
-            <span className="sm:hidden"> </span>Zero commision<br className="hidden sm:block" />
+            Rent, Buy/Sell <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-green-200 to-teal-300">
               No Agent Fee & Inspection
             </span>
           </h1>
           <p className="text-white/90 text-base sm:text-lg md:text-xl max-w-3xl mx-auto px-2 drop-shadow-md">
-            Find eco-friendly, affordable housing in the most sustainable neighborhoods
+            Explore affordable housing options in Nigeria’s most sustainable communities
           </p>
         </div>
 
