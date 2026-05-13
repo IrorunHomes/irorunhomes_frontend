@@ -24,6 +24,7 @@ const AUTH_ENDPOINTS = {
   CHANGE_PASSWORD: '/auth/change-password',
   UPDATE_PROFILE: '/auth/update-profile',
   NIN_VERIFICATION: '/auth/verify-nin',
+  REFRESH_TOKEN: '/auth/refresh-token',
 } as const;
 
 // Error response type
@@ -90,13 +91,47 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor with better error handling
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ErrorResponse>) => {
+    const originalRequest = error.config;
     
-
-    // Handle other error cases
+    // Only attempt refresh for 401 errors that are not login/refresh requests
+    if (error.response?.status === 401 && 
+        originalRequest && 
+        !originalRequest._retry &&
+        !originalRequest.url?.includes('/login') &&
+        !originalRequest.url?.includes('/refresh-token')) {
+      
+      originalRequest._retry = true;
+      
+      try {
+        const refreshResponse = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}${AUTH_ENDPOINTS.REFRESH_TOKEN}`,
+          {},
+          { withCredentials: true }
+        );
+        
+        if (refreshResponse.data.accessToken) {
+          cookieService.set('accessToken', refreshResponse.data.accessToken, 7);
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
+          }
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        // Silent fail - don't redirect on refresh failure
+        console.warn('Token refresh failed');
+      }
+    }
+    
+    // Don't redirect on login failures
+    if (error.response?.status === 401 && originalRequest?.url?.includes('/login')) {
+      return Promise.reject(error);
+    }
+    
+    // Handle other errors
     if (error.code === 'ECONNABORTED') {
       throw new AuthError('Request timeout. Please try again.');
     }
@@ -105,13 +140,11 @@ api.interceptors.response.use(
       const errorData = error.response.data;
       const status = error.response.status;
       
-      // Handle email not verified case
       if (status === 403 && errorData?.message?.toLowerCase().includes('email not verified')) {
         const email = errorData.email || '';
         throw new EmailNotVerifiedError(errorData.message || 'Email not verified', email);
       }
       
-      // Handle validation errors
       if (status === 422 && errorData?.errors) {
         const errorMessage = Object.entries(errorData.errors)
           .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
@@ -120,7 +153,6 @@ api.interceptors.response.use(
       }
       
       throw error;
-      
     } else if (error.request) {
       throw new AuthError('No response received from server. Please check your connection.');
     } else {
@@ -135,16 +167,6 @@ async function handleClientSideLogout() {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('accessToken');
     sessionStorage.clear();
-    
-    // Only redirect if we're not already on auth pages
-    const currentPath = window.location.pathname;
-    const isAuthPage = currentPath.includes('/auth/login') || 
-                      currentPath.includes('/auth/register') || 
-                      currentPath.includes('/auth/verify-email');
-    
-    if (!isAuthPage) {
-      window.location.href = '/auth/login';
-    }
   }
 }
 
@@ -180,47 +202,55 @@ class AuthService {
     }
   }
 
-async login(credentials: LoginCredentials): Promise<AuthResponse> {
-  try {
-    
-    const response = await api.post<AuthResponse>(AUTH_ENDPOINTS.LOGIN, {
-      email: credentials.email,
-      password: credentials.password
-    });
-    if (response.data.accessToken) {
-      cookieService.set('accessToken', response.data.accessToken, 7);
-      if (credentials.rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
-      }
-      return response.data;
-    } else {
-      const errorMessage = response.data.message || 'Login failed';
-      throw new Error(errorMessage);
-    }
-    
-  } catch (error: unknown) {    
-    if (error instanceof AxiosError) {
-      if (error.response) {        
-        const errorMessage = error.response.data?.message || 
-                            error.response.data?.error || 
-                            `Login failed (${error.response.status})`;
-        throw new Error(errorMessage);
-      } else if (error.request) {
-        // The request was made but no response was received
-        throw new Error('No response from server. Please check your connection.');
+  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    try {
+      const response = await api.post<AuthResponse>(AUTH_ENDPOINTS.LOGIN, {
+        email: credentials.email,
+        password: credentials.password
+      });
+      
+      if (response.data.accessToken) {
+        cookieService.set('accessToken', response.data.accessToken, 7);
+        if (credentials.rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+        }
+        return response.data;
       } else {
-        // Something happened in setting up the request that triggered an Error
-        throw new Error(error.message || 'Login failed. Please try again.');
+        const errorMessage = response.data.message || 'Login failed';
+        throw new Error(errorMessage);
       }
+      
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        if (error.response) {        
+          const errorMessage = error.response.data?.message || 
+                              error.response.data?.error || 
+                              `Login failed (${error.response.status})`;
+          throw new Error(errorMessage);
+        } else if (error.request) {
+          throw new Error('No response from server. Please check your connection.');
+        } else {
+          throw new Error(error.message || 'Login failed. Please try again.');
+        }
+      }
+      
+      if (error instanceof Error) {
+        throw error;
+      }
+      
+      throw new Error('An unexpected error occurred');
     }
-    
-    if (error instanceof Error) {
+  }
+
+  async refreshToken(): Promise<{ accessToken: string }> {
+    try {
+      const response = await api.post<{ accessToken: string }>(AUTH_ENDPOINTS.REFRESH_TOKEN);
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Token refresh error:', error);
       throw error;
     }
-    
-    throw new Error('An unexpected error occurred');
   }
-}
 
   async logout(): Promise<void> {
     try {

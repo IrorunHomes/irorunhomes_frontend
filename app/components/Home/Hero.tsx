@@ -1,69 +1,250 @@
 'use client'
 
-import React from 'react'
-import SearchBar from './SearchBar'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import SearchBar, { SearchFilters } from './SearchBar'
 import Image from 'next/image'
 import heroBackground from '../../../public/Hero.avif'
+import { useProperty } from '../../context/PropertyContext'
+import PropertyListings from '../Property/PropertyListings'
+import { Property } from '../../types/property'
+import Link from 'next/link'
 
 const Hero = () => {
+  const router = useRouter()
+  const { properties, fetchProperties, loadingProperties } = useProperty()
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([])
+  const [activeFilters, setActiveFilters] = useState<SearchFilters | null>(null)
+  const [showResults, setShowResults] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch properties on mount
+  useEffect(() => {
+    const loadProperties = async () => {
+      setIsLoading(true)
+      await fetchProperties()
+      setIsLoading(false)
+    }
+    loadProperties()
+  }, [])
+
+  // Initialize with available properties when properties are loaded
+  useEffect(() => {
+    if (properties && properties.length > 0) {
+      const availableProps = properties.filter(p => p.status === 'available')
+      // Limit to 4 featured properties
+      setFilteredProperties(availableProps.slice(0, 4))
+    }
+  }, [properties])
+
+  const applyFilters = (filters: SearchFilters) => {
+    let filtered = [...properties]
+    
+    // Filter by status - only available
+    filtered = filtered.filter(p => p.status === 'available')
+    
+    // Apply type filter
+    if (filters.type !== 'all') {
+      filtered = filtered.filter(p => p.apartmentType === filters.type)
+    }
+    
+    // Apply city filter
+    if (filters.city !== 'all') {
+      filtered = filtered.filter(p => p.city === filters.city)
+    }
+    
+    // Apply price range
+    if (filters.minPrice) {
+      filtered = filtered.filter(p => p.price >= filters.minPrice!)
+    }
+    if (filters.maxPrice) {
+      filtered = filtered.filter(p => p.price <= filters.maxPrice!)
+    }
+    
+    // Apply bedrooms filter
+    if (filters.bedrooms !== 'all') {
+      filtered = filtered.filter(p => p.features.bedrooms >= Number(filters.bedrooms!))
+    }
+    
+    setFilteredProperties(filtered)
+  }
+
+  const handleSearch = (filters: SearchFilters) => {
+    setActiveFilters(filters)
+    applyFilters(filters)
+    setShowResults(true)
+    
+    setTimeout(() => {
+      const resultsSection = document.getElementById('property-results')
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
+  }
+
+  const handleClearResults = () => {
+    setShowResults(false)
+    setActiveFilters(null)
+    const availableProps = properties.filter(p => p.status === 'available')
+    // Reset to 4 featured properties
+    setFilteredProperties(availableProps.slice(0, 4))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Handle card click - navigate to property details
+  const handleCardClick = (propertyId: string) => {
+    router.push(`/properties/${propertyId}`)
+  }
+
+  const getActiveFiltersCount = () => {
+    if (!activeFilters) return 0
+    let count = 0
+    if (activeFilters.type !== 'all') count++
+    if (activeFilters.city !== 'all') count++
+    if (activeFilters.minPrice) count++
+    if (activeFilters.maxPrice) count++
+    if (activeFilters.bedrooms !== 'all') count++
+    return count
+  }
+
+  // Show loading state while fetching
+  if (isLoading || (loadingProperties && properties.length === 0)) {
+    return (
+      <>
+        <section className="relative min-h-[90vh] overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0">
+              <Image
+                src={heroBackground}
+                alt="San Francisco Bay Area landscape"
+                fill
+                priority
+                className="object-cover object-center"
+                sizes="100vw"
+                quality={90}
+                placeholder="blur"
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-green-900/60 to-teal-900/70"></div>
+          </div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-20 md:pt-32">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+              <p className="text-white mt-4">Loading properties...</p>
+            </div>
+          </div>
+        </section>
+      </>
+    )
+  }
+
   return (
-    <section className="relative min-h-[90vh] overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <Image
-            src={heroBackground}
-            alt="San Francisco Bay Area landscape"
-            fill
-            priority
-            className="object-cover object-center"
-            sizes="100vw"
-            quality={90}
-            placeholder="blur"
+    <>
+      <section className="relative min-h-[90vh] overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0">
+            <Image
+              src={heroBackground}
+              alt="San Francisco Bay Area landscape"
+              fill
+              priority
+              className="object-cover object-center"
+              sizes="100vw"
+              quality={90}
+              placeholder="blur"
+            />
+          </div>
+          
+          {/* Dark Overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-green-900/60 to-teal-900/70"></div>
+          
+          {/* Subtle Pattern Overlay */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0LjVjMC0xLjM4MS0xLjExOS0yLjUtMi41LTIuNVMzMSAzMy4xMTkgMzEgMzQuNSAzMi4xMTkgMzcgMzMuNSAzN1MzNiAzNS44ODEgMzYgMzQuNXptMS41IDBjMCAyLjIwOS0xLjc5MSA0LTQgNFMyOSAzNi43MDkgMjkgMzQuNSAzMC43OTEgMzAuNSAzMy41IDMwLjUgMzcgMzIuMjkxIDM3IDM0LjV6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-20 md:pt-32">
+          {/* Main Heading - Optimized for Mobile */}
+          <div className="text-center mb-10 md:mb-12">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight drop-shadow-lg">
+              Rent, Buy/Sell <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-green-200 to-teal-300">
+                No Agent Fee & Inspection
+              </span>
+            </h1>
+            <p className="text-white/90 text-base sm:text-lg md:text-xl max-w-3xl mx-auto px-2 drop-shadow-md">
+              Explore affordable housing options in Nigeria’s most sustainable communities
+            </p>
+          </div>
+
+          {/* Search Bar Component */}
+          <div className="max-w-4xl mx-auto px-2 sm:px-4">
+            <SearchBar onSearch={handleSearch} initialFilters={activeFilters || undefined} />
+          </div>
+        </div>
+
+        {/* Scroll Indicator for Mobile */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:hidden z-20">
+          <div className="animate-bounce">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Gradient Fade at Bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-emerald-900/30 to-transparent pointer-events-none"></div>
+      </section>
+
+      {/* Property Listings Section */}
+      <div id="property-results" className="py-12 md:py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          {/* Header with Title and Browse Button */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h1 className="text-2xl font-bold text-gray-900">Featured Properties</h1>
+            <Link
+              href="/properties"
+              className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-700 text-white font-semibold rounded-lg hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg inline-flex items-center gap-2 text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+              Browse All Properties
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
+          {/* Search Header - Only visible when filters are active */}
+          {showResults && activeFilters && getActiveFiltersCount() > 0 && (
+            <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-lg p-4 shadow-sm">
+              <div>
+                <p className="text-sm text-emerald-600">
+                  <span className="font-semibold">{filteredProperties.length}</span> properties found matching your criteria
+                </p>
+              </div>
+              <button
+                onClick={handleClearResults}
+                className="px-4 py-2 text-sm border border-emerald-300 text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear Search
+              </button>
+            </div>
+          )}
+
+          {/* Property Listings - Pass the click handler */}
+          <PropertyListings 
+            properties={filteredProperties}
+            onCardClick={handleCardClick}
           />
         </div>
-        
-        {/* Dark Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-green-900/60 to-teal-900/70"></div>
-        
-        {/* Subtle Pattern Overlay */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0LjVjMC0xLjM4MS0xLjExOS0yLjUtMi41LTIuNVMzMSAzMy4xMTkgMzEgMzQuNSAzMi4xMTkgMzcgMzMuNSAzN1MzNiAzNS44ODEgMzYgMzQuNXptMS41IDBjMCAyLjIwOS0xLjc5MSA0LTQgNFMyOSAzNi43MDkgMjkgMzQuNSAzMC43OTEgMzAuNSAzMy41IDMwLjUgMzcgMzIuMjkxIDM3IDM0LjV6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
       </div>
-
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-20 md:pt-32">
-        {/* Main Heading - Optimized for Mobile */}
-        <div className="text-center mb-10 md:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight drop-shadow-lg">
-            Rent, Buy/Sell <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-green-200 to-teal-300">
-              No Agent Fee & Inspection
-            </span>
-          </h1>
-          <p className="text-white/90 text-base sm:text-lg md:text-xl max-w-3xl mx-auto px-2 drop-shadow-md">
-            Explore affordable housing options in Nigeria’s most sustainable communities
-          </p>
-        </div>
-
-        {/* Search Bar Component */}
-        <div className="max-w-4xl mx-auto px-2 sm:px-4">
-          <SearchBar />
-        </div>
-      </div>
-
-      {/* Scroll Indicator for Mobile */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:hidden z-20">
-        <div className="animate-bounce">
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Gradient Fade at Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-emerald-900/30 to-transparent pointer-events-none"></div>
-    </section>
+    </>
   )
 }
 

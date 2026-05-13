@@ -8,8 +8,8 @@ import PropertyFilters, { PropertyFilters as PropertyFiltersType } from '../prop
 import { useProperty } from '../../../../context/PropertyContext'
 import { useUser } from '../../../../context/UserContext'
 import { useRouter } from 'next/navigation'
-import { 
-  PlusIcon, 
+import {
+  PlusIcon,
   ArrowPathIcon,
   DocumentArrowDownIcon,
   Squares2X2Icon,
@@ -24,8 +24,9 @@ import {
   ClockIcon,
   ExclamationCircleIcon,
   NoSymbolIcon
-} from '@heroicons/react/24/outline'
-import { Property } from '../../../../types/property'
+} from '@heroicons/react/24/outline';
+import { Property } from '../../../../types/property';
+import { useMessage } from '../../../../components/ui/MessagePopup'
 
 export default function PropertiesPage() {
   const router = useRouter()
@@ -41,6 +42,8 @@ export default function PropertiesPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [selectedProperties, setSelectedProperties] = useState<string[]>([])
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const { showSuccess } = useMessage()
 
   // Fetch properties on mount
   useEffect(() => {
@@ -175,6 +178,7 @@ export default function PropertiesPage() {
       try {
         const result = await deleteProperty(propertyId)
         if (result.success) {
+          showSuccess('Property deleted successfully' + (result.message ? `: ${result.message}` : ''))
           // Refresh properties
           await fetchAdminProperties()
         }

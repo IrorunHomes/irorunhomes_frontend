@@ -43,8 +43,6 @@ authApi.interceptors.response.use(
   }
 )
 
-
-
 export class RentalRequestService {
   
   // ============ TENANT FUNCTIONS ============
@@ -163,11 +161,12 @@ export class RentalRequestService {
 
   /**
    * Cancel a rental request
-   * PATCH /tenant/request/:requestId/cancel
+   * POST /tenant/request/:requestId/cancel (your route uses POST, not PATCH)
    */
   async cancelRequest(requestId: string): Promise<{ success: boolean; request?: RentalRequest; message?: string }> {
     try {
-      const response = await authApi.patch<ApiResponse<RentalRequest>>(`/tenant/request/${requestId}/cancel`)
+      // Changed from PATCH to POST to match your backend route
+      const response = await authApi.post<ApiResponse<RentalRequest>>(`/tenant/request/${requestId}/cancel`)
       
       return {
         success: true,
@@ -200,7 +199,7 @@ export class RentalRequestService {
 
   /**
    * Upload payment receipt for approved request
-   * POST /tenant/request/:requestId/payment-receipt
+   * POST /tenant/upload-receipt/:requestId
    */
   async uploadPaymentReceipt(
     requestId: string, 
@@ -261,46 +260,61 @@ export class RentalRequestService {
     }
   }
 
-  /**
-   * Get tenant's active lease
-   * GET /tenant/lease
-   */
-  async getTenantLease(): Promise<{ success: boolean; lease?: RentalRequest; message?: string }> {
-    try {
-      const response = await authApi.get<ApiResponse<RentalRequest>>('/tenant/lease')
-      console.log("lease", response)
-      
+/**
+ * Get tenant's active lease
+ * GET /tenant/lease
+ */
+async getTenantLease(): Promise<{ success: boolean; lease?: RentalRequest; message?: string }> {
+  try {
+    const response = await authApi.get<ApiResponse<RentalRequest>>('/tenant/lease')
+    console.log("lease response:", response.data)
+    
+    // The backend returns { success: true, lease: {...} }
+    if (response.data.success && response.data.lease) {
       return {
         success: true,
-        lease: response.data.lease || response.data.request || response.data.data,
+        lease: response.data.lease,
         message: response.data.message
       }
-    } catch (error) {
-      console.error('Error fetching tenant lease:', error)
-      
-      if (error instanceof AxiosError) {
-        if (error.response?.status === 404) {
-          return {
-            success: false,
-            message: 'No active lease found'
-          }
+    }
+    
+    return {
+      success: false,
+      message: response.data.message || 'No active lease found'
+    }
+  } catch (error) {
+    console.error('Error fetching tenant lease:', error)
+    
+    if (error instanceof AxiosError) {
+      // 404 is expected when no active lease exists
+      if (error.response?.status === 404) {
+        return {
+          success: false,
+          message: 'No active lease found'
         }
       }
-      
-      return {
-        success: false,
-        message: 'Failed to fetch lease'
+      if (error.response?.status === 401) {
+        return {
+          success: false,
+          message: 'Please log in to view your lease'
+        }
       }
     }
+    
+    return {
+      success: false,
+      message: 'Failed to fetch lease'
+    }
   }
+}
 
-  /**
+  /** 
    * Get tenant's lease by ID
-   * GET /tenant/leases/:leaseId
+   * GET /tenant/lease/:leaseId
    */
-  async getTenantLeaseById(requestId: string): Promise<{ success: boolean; data?: RentalRequest; message?: string }> {
+  async getTenantLeaseById(leaseId: string): Promise<{ success: boolean; data?: RentalRequest; message?: string }> {
     try {
-      const response = await authApi.get<ApiResponse<RentalRequest>>(`/tenant/lease/${requestId}`)
+      const response = await authApi.get<ApiResponse<RentalRequest>>(`/tenant/lease/${leaseId}`)
       
       return {
         success: true,
@@ -308,7 +322,7 @@ export class RentalRequestService {
         message: response.data.message
       }
     } catch (error) {
-      console.error(`Error fetching tenant lease ${requestId}:`, error)
+      console.error(`Error fetching tenant lease ${leaseId}:`, error)
       
       if (error instanceof AxiosError) {
         if (error.response?.status === 404) {
@@ -411,7 +425,7 @@ export class RentalRequestService {
 
   /**
    * Register a new admin (Super Admin only)
-   * POST /admin/register
+   * POST /admin/register-admin
    */
   async registerAdmin(payload: RegisterAdminPayload): Promise<{ success: boolean; user?: User; message?: string }> {
     try {
@@ -448,7 +462,7 @@ export class RentalRequestService {
 
   /**
    * Get all rental requests (Admin view)
-   * GET /admin/rental-requests
+   * GET /admin/requests
    */
   async getAllRentalRequests(params?: PaginationParams): Promise<{ 
     success: boolean; 

@@ -18,11 +18,15 @@ import {
   CloudArrowUpIcon,
   CheckCircleIcon,
   ClockIcon
-} from '@heroicons/react/24/outline'
-import { ApartmentType } from '../../types/property'
+} from '@heroicons/react/24/outline';
+import { ApartmentType } from '../../types/property';
+import { useMessage } from '../ui/MessagePopup';
+import { Property} from '../../types/property'
+
 
 interface PropertyFormProps {
-  propertyId?: string // For editing existing property
+  propertyId?: string 
+  initialData?: Property 
 }
 
 interface DraftData {
@@ -87,10 +91,10 @@ const DRAFT_KEY = 'property_draft_data'
 const DRAFT_IMAGES_KEY = 'property_draft_images'
 const DRAFT_TIMESTAMP_KEY = 'property_draft_timestamp'
 
-export default function PropertyForm({ propertyId }: PropertyFormProps) {
+export default function PropertyForm({ propertyId, initialData }: PropertyFormProps) {
   const router = useRouter()
   const { listNewProperty, updateProperty, loadingListNew, loadingUpdate } = useProperty()
-  
+  const { showSuccess, showError, showWarning } = useMessage()
   // Form state
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -162,7 +166,7 @@ export default function PropertyForm({ propertyId }: PropertyFormProps) {
     // Step 9: Management Info
     commissionRate: 10,
     managementFee: 0,
-    paymentSchedule: 'monthly',
+    paymentSchedule: 'yearly',
     contractStartDate: '',
     contractEndDate: ''
   })
@@ -248,7 +252,7 @@ export default function PropertyForm({ propertyId }: PropertyFormProps) {
         }))
       }
     } catch (error) {
-      console.error('Error loading draft:', error)
+      showError('Error loading draft:', error)
     }
   }
 
@@ -258,7 +262,7 @@ export default function PropertyForm({ propertyId }: PropertyFormProps) {
       setIsSaving(true)
       
       // Save form data (excluding files)
-      const { images, imagePreviews, video, videoPreview, ...draftData } = formData
+      const { imagePreviews, ...draftData } = formData
       
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData))
       localStorage.setItem(DRAFT_IMAGES_KEY, JSON.stringify({ imagePreviews }))
@@ -269,7 +273,7 @@ export default function PropertyForm({ propertyId }: PropertyFormProps) {
       
       setTimeout(() => setIsSaving(false), 500)
     } catch (error) {
-      console.error('Error saving draft:', error)
+      showError('Error saving draft:', error)
       setIsSaving(false)
     }
   }
@@ -330,6 +334,84 @@ export default function PropertyForm({ propertyId }: PropertyFormProps) {
     })
   }
 
+  useEffect(() => {
+    if (initialData && propertyId) {
+      // Clear any existing draft when editing
+      clearDraft()
+      
+      // Populate form with existing property data - properly typed
+      setFormData({
+        // Step 1: Basic Information
+        title: initialData.title || '',
+        description: initialData.description || '',
+        price: initialData.price || 0,
+        address: initialData.address || '',
+        city: initialData.city || '',
+        state: initialData.state || '',
+        country: initialData.country || 'Nigeria',
+        apartmentType: initialData.apartmentType,
+        unitNumber: initialData.unitNumber || '',
+        apartmentCount: initialData.apartmentCount || 1,
+
+        // Step 2: Features
+        bedrooms: initialData.features?.bedrooms ?? 0,
+        bathrooms: initialData.features?.bathrooms ?? 0,
+        toilet: initialData.features?.toilet ?? 0,
+        parking: initialData.features?.parking ?? false,
+        kitchen: initialData.features?.kitchen ?? false,
+        amenities: initialData.features?.amenities ?? [],
+        extras: initialData.features?.extras ?? [],
+
+        // Step 3: Media - Only populate previews, not actual files
+        images: [],
+        imagePreviews: initialData.media?.images?.map((img: { url: string; public_id: string }) => img.url) ?? [],
+        video: null,
+        videoPreview: initialData.media?.videos?.[0]?.url ?? null,
+
+        // Step 4: Landlord Information
+        landlordFullName: initialData.landlordInfo?.personalInfo?.fullName ?? '',
+        landlordEmail: initialData.landlordInfo?.personalInfo?.email ?? '',
+        landlordPhone: initialData.landlordInfo?.personalInfo?.phone ?? '',
+        landlordAlternativePhone: initialData.landlordInfo?.personalInfo?.alternativePhone ?? '',
+        landlordOccupation: initialData.landlordInfo?.additionalInfo?.occupation ?? '',
+        landlordNotes: initialData.landlordInfo?.additionalInfo?.notes ?? '',
+
+        // Step 5: Contact Address
+        landlordStreet: initialData.landlordInfo?.contactAddress?.street ?? '',
+        landlordCity: initialData.landlordInfo?.contactAddress?.city ?? '',
+        landlordState: initialData.landlordInfo?.contactAddress?.state ?? '',
+        landlordCountry: initialData.landlordInfo?.contactAddress?.country ?? '',
+
+        // Step 6: Bank Details
+        bankName: initialData.landlordInfo?.bankDetails?.bankName ?? '',
+        accountNumber: initialData.landlordInfo?.bankDetails?.accountNumber ?? '',
+        accountName: initialData.landlordInfo?.bankDetails?.accountName ?? '',
+
+        // Step 7: Emergency Contact
+        emergencyContactName: initialData.landlordInfo?.emergencyContact?.name ?? '',
+        emergencyContactRelationship: initialData.landlordInfo?.emergencyContact?.relationship ?? '',
+        emergencyContactPhone: initialData.landlordInfo?.emergencyContact?.phone ?? '',
+        emergencyContactEmail: initialData.landlordInfo?.emergencyContact?.email ?? '',
+
+        // Step 8: Additional Information
+        nextOfKin: initialData.landlordInfo?.additionalInfo?.nextOfKin ?? '',
+        relationshipToKin: initialData.landlordInfo?.additionalInfo?.relationshipToKin ?? '',
+        kinPhone: initialData.landlordInfo?.additionalInfo?.kinPhone ?? '',
+
+        // Step 9: Management Info
+        commissionRate: initialData.managementInfo?.commissionRate ?? 10,
+        managementFee: initialData.managementInfo?.managementFee ?? 0,
+        paymentSchedule: initialData.managementInfo?.paymentSchedule ?? 'monthly',
+        contractStartDate: initialData.managementInfo?.contractStartDate 
+          ? new Date(initialData.managementInfo.contractStartDate).toISOString().split('T')[0] 
+          : '',
+        contractEndDate: initialData.managementInfo?.contractEndDate 
+          ? new Date(initialData.managementInfo.contractEndDate).toISOString().split('T')[0] 
+          : ''
+      })
+    }
+  }, [initialData, propertyId])
+
   // Handle input changes with auto-save
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -370,11 +452,11 @@ export default function PropertyForm({ propertyId }: PropertyFormProps) {
     
     const validFiles = files.filter(file => {
       if (!file.type.startsWith('image/')) {
-        alert(`${file.name} is not an image file`)
+        showError(`${file.name} is not an image file`)
         return false
       }
       if (file.size > 10 * 1024 * 1024) {
-        alert(`${file.name} is too large. Maximum 10MB per image.`)
+        showError(`${file.name} is too large. Maximum 10MB per image.`)
         return false
       }
       return true
@@ -405,12 +487,12 @@ export default function PropertyForm({ propertyId }: PropertyFormProps) {
     if (!file) return
     
     if (!file.type.startsWith('video/')) {
-      alert('Please upload a video file')
+      showError('Please upload a video file')
       return
     }
     
     if (file.size > 50 * 1024 * 1024) {
-      alert('Video file is too large. Maximum 50MB.')
+      showError('Video file is too large. Maximum 50MB.')
       return
     }
     
@@ -521,64 +603,6 @@ export default function PropertyForm({ propertyId }: PropertyFormProps) {
     return Object.keys(newErrors).length === 0
   }
 
-  // Property data interface
-  interface PropertyData {
-    title: string
-    description: string
-    price: number
-    address: string
-    city: string
-    state: string
-    country: string
-    apartmentType: ApartmentType
-    unitNumber: string
-    apartmentCount: number
-
-      bedrooms: number
-      bathrooms: number
-      parking: boolean
-      kitchen: boolean
-      toilet: number
-      amenities: string[]
-      extras: string[]
-    
-    landlordInfo: {
-      fullName: string
-      email: string
-      phone: string
-      alternativePhone: string
-      occupation: string
-      notes: string
-      address: {
-        street: string
-        city: string
-        state: string
-        country: string
-      }
-      bankDetails: {
-        bankName: string
-        accountNumber: string
-        accountName: string
-      }
-      emergencyContact: {
-        name: string
-        relationship: string
-        phone: string
-        email: string
-      }
-      nextOfKin: {
-        name: string
-        relationship: string
-        phone: string
-      }
-    }
-    commissionRate: number
-    managementFee: number
-    paymentSchedule: string
-    contractStartDate: string
-    contractEndDate: string
-  }
-
   // Prepare data for context functions
 const preparePropertyData = () => {
   // Create form data object matching your backend's flat field structure
@@ -648,7 +672,7 @@ const preparePropertyData = () => {
 // Then in handleSubmit, send the flat structure:
 const handleSubmit = async () => {
   if (!termsAccepted) {
-    alert('Please accept the terms and conditions')
+    showWarning('Please accept the terms and conditions')
     return
   }
 
@@ -670,7 +694,7 @@ const handleSubmit = async () => {
       
       if (result.success) {
         clearDraft()
-        alert('Property updated successfully!')
+        showSuccess('Property updated successfully' + (result.message ? `: ${result.message}` : ''))
         router.push('/dashboard/super-admin/properties')
       } else {
         throw new Error(result.message || 'Failed to update property')
@@ -685,15 +709,14 @@ const handleSubmit = async () => {
       
       if (result.success) {
         clearDraft()
-        alert('Property listed successfully!')
+        showSuccess('Property listed successfully!')
         router.push('/dashboard/super-admin/properties')
-      } else {
+      } else { 
         throw new Error('Failed to create property')
       }
     }
   } catch (error: unknown) {
-    console.error('Error creating property:', error)
-    alert(error instanceof Error ? error.message : 'Failed to create property')
+    showError(error instanceof Error ? error.message : 'Failed to create property')
   } finally {
     setIsSubmitting(false)
   }
@@ -970,7 +993,7 @@ const Step1BasicInfo: React.FC<StepProps> = ({ formData, errors, handleChange })
         
         <div>
           <label className="block text-sm font-medium text-emerald-700 mb-2">
-            Monthly Price ($) *
+            Yearly Price (₦) *
           </label>
           <input
             type="number"
@@ -1793,7 +1816,7 @@ const Step9ManagementInfo: React.FC<StepProps> = ({ formData, errors, handleChan
         
         <div>
           <label className="block text-sm font-medium text-emerald-700 mb-2">
-            Management Fee ($)
+            Management Fee (₦)
           </label>
           <input
             type="number"
@@ -1881,7 +1904,7 @@ const Step10Review: React.FC<StepReviewProps> = ({ formData, termsAccepted, setT
             </div>
             <div>
               <span className="text-emerald-600">Price:</span>
-              <p className="font-medium">${formData.price || '0'}/month</p>
+              <p className="font-medium">#{formData.price || '0'}/year</p>
             </div>
             <div>
               <span className="text-emerald-600">Type:</span>
@@ -1957,7 +1980,7 @@ const Step10Review: React.FC<StepReviewProps> = ({ formData, termsAccepted, setT
             <div>
               <span className="text-emerald-600">Commission Rate:</span>
               <p className="font-medium">{formData.commissionRate}%</p>
-            </div>
+            </div>#
             <div>
               <span className="text-emerald-600">Payment Schedule:</span>
               <p className="font-medium capitalize">{formData.paymentSchedule}</p>

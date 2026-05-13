@@ -23,7 +23,7 @@ export default function QuickActions() {
       description: 'Check pending rental requests',
       icon: DocumentCheckIcon,
       color: 'from-blue-500 to-cyan-500',
-      path: '/dashboard/super-admin/rental-requests'
+      path: '/dashboard/super-admin/requests'
     },
     {
       title: 'Add Admin User',

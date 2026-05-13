@@ -4,6 +4,8 @@ import { authService } from '../api/auth';
 import type { User, UserFilters } from '../types/auth';
 import { cookieService } from '../lib/cookies';
 import { useMessage } from '../components/ui/MessagePopup';
+import { useRouter } from 'next/navigation'
+
 
 interface UserStats {
   totalUsers: number;
@@ -47,6 +49,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [userStats, setUserStats] = useState<UserStats | null>(null)
   const [loadingUsers, setLoadingUsers] = useState(false)
   const { showSuccess } = useMessage();
+  const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
+  const router = useRouter()
 
   // Helper to store user in cookies
   const storeUserInCookies = (userData: User) => {
@@ -73,67 +77,112 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return null;
   };
 
-  useEffect(() => {
-    checkAuth();
+    // Function to refresh token
+  const refreshAccessToken = useCallback(async () => {
+    try {
+      const result = await authService.refreshToken();
+      if (result.accessToken) {
+        cookieService.set('accessToken', result.accessToken, 7);
+        console.log('Token refreshed successfully');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      return false;
+    }
   }, []);
 
+  // Setup periodic token refresh (every 12 minutes, since token expires in 15)
+  const setupTokenRefresh = useCallback(() => {
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+    }
+
+    const timer = setInterval(async () => {
+      const token = cookieService.get('accessToken');
+      if (token) {
+        await refreshAccessToken();
+      }
+    }, 12 * 60 * 1000); // 12 minutes
+
+    setRefreshTimer(timer);
+  }, [refreshAccessToken, refreshTimer]);
+
+  const clearTokenRefresh = useCallback(() => {
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+      setRefreshTimer(null);
+    }
+  }, [refreshTimer]);
+
+  // Update checkAuth to setup refresh
   const checkAuth = async () => {
     setLoading(true);
     
     try {
-      // Get token from cookies
       const token = cookieService.get('accessToken');
       
       if (!token) {
         setUser(null);
         setIsAuthenticated(false);
-        cookieService.remove('userData'); // Clear any stale user data
+        cookieService.remove('userData');
+        clearTokenRefresh();
         return;
       }
 
       const cachedUser = getUserFromCookies();
       
-      // Show cached user immediately for better UX
       if (cachedUser) {
         setUser(cachedUser);
         setIsAuthenticated(true);
       }
 
-      // Always try to get fresh data from API
       try {
         const apiUserData = await authService.getCurrentUser();
         
         if (apiUserData) {
           setUser(apiUserData);
           setIsAuthenticated(true);
-          storeUserInCookies(apiUserData); // Update cache with fresh data
+          storeUserInCookies(apiUserData);
+          setupTokenRefresh();
         } else {
-          // API returned null - token might be invalid or expired
           setUser(null);
           setIsAuthenticated(false);
           cookieService.clearAuthToken();
           cookieService.remove('userData');
+          clearTokenRefresh();
         }
         
       } catch (apiError) {
         console.error('API fetch failed:', apiError);
         
-        // If we have cached user, keep showing it but mark as potentially stale
         if (cachedUser) {
+          // Keep cached user but try to refresh token
+          const refreshed = await refreshAccessToken();
+          if (!refreshed) {
+            setUser(null);
+            setIsAuthenticated(false);
+            cookieService.clearAuthToken();
+            cookieService.remove('userData');
+            clearTokenRefresh();
+          }
         } else {
           setUser(null);
           setIsAuthenticated(false);
           cookieService.clearAuthToken();
           cookieService.remove('userData');
+          clearTokenRefresh();
         }
       }
       
     } catch (error) {
-      console.error('Auth check failed completely:', error);
+      console.error('Auth check failed:', error);
       setUser(null);
       setIsAuthenticated(false);
       cookieService.clearAuthToken();
       cookieService.remove('userData');
+      clearTokenRefresh();
     } finally {
       setLoading(false);
     }
@@ -144,6 +193,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(true);
     cookieService.set('accessToken', token, 7);
     storeUserInCookies(userData);
+    setupTokenRefresh();
     showSuccess('Login successful');
   };
 
@@ -151,6 +201,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       await authService.logout();
       showSuccess('Logout successful');
+      router.push('/auth/login');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -158,8 +209,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(false);
       cookieService.clearAuthToken();
       cookieService.remove('userData');
+      clearTokenRefresh();
     }
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+      }
+    };
+  }, [refreshTimer]);
+
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   
   const updateUser = (updates: Partial<User>) => {

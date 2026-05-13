@@ -75,8 +75,8 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Us</h3>
               <p className="text-gray-600 mb-4">24/7 Support</p>
-              <a href="mailto:support@irorunhomes.com" className="text-emerald-600 hover:text-emerald-800 font-medium">
-                support@irorunhomes.com
+              <a href="mailto:info@irorunhomes.com" className="text-emerald-600 hover:text-emerald-800 font-medium">
+                info@irorunhomes.com
               </a>
             </div>
 
@@ -86,8 +86,8 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Call Us</h3>
               <p className="text-gray-600 mb-4">Mon-Fri, 8am-6pm</p>
-              <a href="tel:+2341234567890" className="text-emerald-600 hover:text-emerald-800 font-medium">
-                +234 123 456 7890
+              <a href="tel:+23408110123456" className="text-emerald-600 hover:text-emerald-800 font-medium">
+                +234 0811-0123456
               </a>
             </div>
 

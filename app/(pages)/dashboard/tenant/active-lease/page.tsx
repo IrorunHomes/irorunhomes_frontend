@@ -75,7 +75,7 @@ export default function TenantLeasePage() {
             You dont have any active lease at the moment.
           </p>
           <Link
-            href="/properties"
+            href="/dashboard/tenant"
             className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
           >
             Browse Properties

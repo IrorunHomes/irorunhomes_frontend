@@ -287,11 +287,11 @@ export default function AboutPage() {
           <div className="mt-8 flex items-center justify-center space-x-6 text-sm text-emerald-200">
             <div className="flex items-center">
               <PhoneIcon className="w-4 h-4 mr-2" />
-              <span>+234 123 456 7890</span>
+              <span>+234 0811-0123456</span>
             </div>
             <div className="flex items-center">
               <EnvelopeIcon className="w-4 h-4 mr-2" />
-              <span>hello@irorunhomes.com</span>
+              <span>info@irorunhomes.com</span>
             </div>
           </div>
         </div>
