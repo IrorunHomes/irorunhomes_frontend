@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import RentalRequestForm from '../../../../components/Property/RentalRequestForm'
-import { useProperty } from '../../../../context/PropertyContext'
-import { useUser } from '../../../../context/UserContext'
-import { Property } from '../../../../types/property'
+import RentalRequestForm from '../../../../../../components/Property/RentalRequestForm'
+import { useProperty } from '../../../../../../context/PropertyContext'
+import { useUser } from '../../../../../../context/UserContext'
+import { Property } from '../../../../../../types/property'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import DashboardLayout from '../../../../DashboardLayout'
 
-export default function RentalRequestPage() {
+export default function DashboardPropertyRequest() {
   const params = useParams()
   const router = useRouter()
   const { user } = useUser()
@@ -45,7 +46,7 @@ export default function RentalRequestPage() {
   // Check if user is logged in
   useEffect(() => {
     if (!user) {
-      router.push(`/auth/login?redirect=/properties/${propertyId}/request`)
+      router.push(`/auth/login?redirect=/dashboard/tenant/properties/${propertyId}/request`)
     }
   }, [user, router, propertyId])
 
@@ -88,8 +89,9 @@ export default function RentalRequestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+    <DashboardLayout>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="bg-white rounded-t-2xl border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center">
@@ -112,5 +114,6 @@ export default function RentalRequestPage() {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   )
 }

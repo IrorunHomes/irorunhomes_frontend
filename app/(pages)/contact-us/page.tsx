@@ -45,7 +45,7 @@ export default function ContactPage() {
     {
       city: 'Osun',
       address: 'Osogbo, Osun State',
-      phone: '+234 123 456 7890',
+      phone: '+234 0816 743 6407',
       email: 'info@irorunhomes.com',
       hours: 'Mon-Fri: 8am - 6pm, Sat: 9am - 2pm'
     }
@@ -86,8 +86,8 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Call Us</h3>
               <p className="text-gray-600 mb-4">Mon-Fri, 8am-6pm</p>
-              <a href="tel:+23408110123456" className="text-emerald-600 hover:text-emerald-800 font-medium">
-                +234 0811-0123456
+              <a href="tel:+23408167436407" className="text-emerald-600 hover:text-emerald-800 font-medium">
+                +234 0816-743 6407
               </a>
             </div>
 

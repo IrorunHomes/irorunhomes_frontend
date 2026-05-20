@@ -1,9 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import logo from "../../../public/irorun-logo.png";
 import Image from "next/image";
 import Link from "next/link";
+import { useUser } from '../../context/UserContext';
+import { UserCircleIcon, HomeIcon, BuildingOfficeIcon, CurrencyDollarIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 export const IrorunHomesLogo = () => (
   <Link href="/" className="flex items-center space-x-2">
@@ -18,15 +21,57 @@ export const IrorunHomesLogo = () => (
 );
 
 const Navbar = () => {
+  const router = useRouter()
+  const { user, isAuthenticated, logout } = useUser()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-   const navigate = (path: string) => {
-    window.location.href = path;
-  };
 
-  const handleClick = () => {
-    navigate('/auth/login');
-  };
+  // Get dashboard path based on user role
+  const getDashboardPath = () => {
+    if (!user) return '/auth/login'
+    
+    switch (user.role) {
+      case 'super_admin':
+        return '/dashboard/super-admin'
+      case 'admin':
+        return '/dashboard/super-admin/admin'
+      case 'tenant':
+        return '/dashboard/tenant'
+      default:
+        return '/dashboard/tenant'
+    }
+  }
+
+  // Get dashboard button text
+  const getDashboardText = () => {
+    if (!user) return 'Sign In'
+    
+    switch (user.role) {
+      case 'super_admin':
+        return 'Admin Dashboard'
+      case 'admin':
+        return 'Admin Dashboard'
+      case 'tenant':
+        return 'Dashboard'
+      default:
+        return 'Dashboard'
+    }
+  }
+
+  const handleDashboardClick = () => {
+    if (isAuthenticated && user) {
+      router.push(getDashboardPath())
+    } else {
+      router.push('/auth/login')
+    }
+    setIsMobileMenuOpen(false)
+  }
+
+  const handleLogout = async () => {
+    await logout()
+    router.push('/')
+    setIsMobileMenuOpen(false)
+  }
 
   // Add scroll effect
   useEffect(() => {
@@ -51,12 +96,12 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12">
         
         {/* Logo - Left aligned */}
-        <div className="flex-shrink-0 ">
+        <div className="flex-shrink-0">
           <IrorunHomesLogo />
         </div>
 
         {/* Desktop Navigation Links - Center aligned */}
-        <div className="hidden md:flex flex-1 justify-center items-center space-x-6 lg:space-x-8">
+        <div className="hidden md:flex flex-1 justify-center items-center space-x-6">
           <Link 
             href="/" 
             className={`transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-emerald-50 text-sm lg:text-base ${
@@ -120,15 +165,16 @@ const Navbar = () => {
         </div>
 
         {/* Desktop CTA Button - Right aligned */}
-        <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
-          <button className={`px-4 py-2 lg:px-6 lg:py-2 bg-gradient-to-r from-emerald-600 to-green-700 text-white font-medium rounded-lg hover:opacity-90 transition-all duration-200 text-sm lg:text-base ${
-            isScrolled ? 'shadow-lg hover:shadow-xl' : 'shadow-md hover:shadow-lg'
-          }`} onClick={handleClick}>
-            Sign In
+        <div className="hidden md:flex items-center space-x-4 lg:space-x-6">          
+          <button 
+            onClick={handleDashboardClick}
+            className={`px-6 py-2 bg-gradient-to-r from-emerald-600 to-green-700 text-white font-medium rounded-lg hover:opacity-90 transition-all duration-200 text-sm lg:text-base ${
+              isScrolled ? 'shadow-lg hover:shadow-xl' : 'shadow-md hover:shadow-lg'
+            }`}
+          >
+            {getDashboardText()}
           </button>
         </div>
-        
-        
 
         {/* Mobile Menu Button - Right aligned */}
         <button 
@@ -220,18 +266,47 @@ const Navbar = () => {
             
             {/* Mobile CTA Buttons */}
             <div className="pt-4 mt-2 border-t border-gray-200 flex flex-col space-y-3">
-              <Link href="/auth/login" className="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-700 text-white font-medium rounded-lg hover:opacity-90 transition shadow-lg flex items-center justify-center">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                </svg>
-                Sign In
-              </Link>
-              <Link href="/properties" className="w-full py-3 bg-white text-emerald-700 font-medium rounded-lg border border-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center shadow-sm">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                Find Properties
-              </Link>
+              {isAuthenticated && user ? (
+                <>
+                  <Link
+                    href={getDashboardPath()}
+                    className="w-full py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition flex items-center justify-center shadow-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <HomeIcon className="w-5 h-5 mr-2" />
+                    {getDashboardText()}
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full py-3 bg-white text-red-600 font-medium rounded-lg border border-red-300 hover:bg-red-50 transition flex items-center justify-center"
+                  >
+                    <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2" />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleDashboardClick}
+                    className="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-700 text-white font-medium rounded-lg hover:opacity-90 transition shadow-lg flex items-center justify-center"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    Sign In
+                  </button>
+                  <Link
+                    href="/properties"
+                    className="w-full py-3 bg-white text-emerald-700 font-medium rounded-lg border border-emerald-600 hover:bg-emerald-50 transition flex items-center justify-center shadow-sm"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Find Properties
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

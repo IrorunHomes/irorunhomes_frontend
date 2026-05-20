@@ -141,7 +141,7 @@ export default function AboutPage() {
             </div>
             <div className="relative h-96 rounded-2xl overflow-hidden shadow-xl">
               <Image
-                src="/images/mission.jpg"
+                src="/mission.jpg"
                 alt="Our Mission"
                 fill
                 className="object-cover"
@@ -287,7 +287,7 @@ export default function AboutPage() {
           <div className="mt-8 flex items-center justify-center space-x-6 text-sm text-emerald-200">
             <div className="flex items-center">
               <PhoneIcon className="w-4 h-4 mr-2" />
-              <span>+234 0811-0123456</span>
+              <span>+234 0816-743 6407</span>
             </div>
             <div className="flex items-center">
               <EnvelopeIcon className="w-4 h-4 mr-2" />

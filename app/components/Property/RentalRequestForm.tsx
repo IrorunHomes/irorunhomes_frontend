@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState } from 'react'
@@ -77,7 +76,7 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
     const newErrors: Record<string, string> = {}
 
     if (!formData.message.trim()) {
-      newErrors.message = 'Please provide a brief message to Irorun Homes & Properties'
+      newErrors.message = 'Please provide a brief message to Irorun Homes'
     } else if (formData.message.trim().length < 10) {
       newErrors.message = 'Message must be at least 10 characters'
     } else if (formData.message.trim().length > 500) {
@@ -96,11 +95,59 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
     return Object.keys(newErrors).length === 0
   }
 
+  // Function to send WhatsApp message with form details
+  const sendWhatsAppMessage = () => {
+    const tenantName = user?.fullName || 'Not provided'
+    const tenantPhone = user?.phone || 'Not provided'
+    const tenantEmail = user?.email || 'Not provided'
+    
+    // Format the message
+    const whatsappMessage = `
+🏠 *NEW RENTAL REQUEST - IRORUN HOMES*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 *TENANT INFORMATION*
+• Name: ${tenantName}
+• Phone: ${tenantPhone}
+• Email: ${tenantEmail}
+
+🏢 *PROPERTY DETAILS*
+• Property: ${property.title}
+• Location: ${property.address}, ${property.city}
+• Price: ${formatPrice(property.price)}/year
+• Bedrooms: ${property.features.bedrooms}
+• Bathrooms: ${property.features.bathrooms}
+• Parking: ${property.features.parking ? 'Yes' : 'No'}
+• Kitchen: ${property.features.kitchen ? 'Yes' : 'No'}
+
+📋 *REQUEST DETAILS*
+• Move-in Date: ${new Date(formData.requestedMoveInDate).toLocaleDateString()}
+• Duration: ${formData.duration === '12' ? '12 months (1 year)' : '24 months (2 years)'}
+• Message: ${formData.message}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⏰ Submitted: ${new Date().toLocaleString()}
+📱 Request ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}
+    `.trim()
+
+    // Encode the message for URL
+    const encodedMessage = encodeURIComponent(whatsappMessage)
+    
+    // WhatsApp number (remove the 0 and add 234 prefix)
+    const whatsappNumber = '2348167436407'
+    
+    // Create WhatsApp URL
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`
+    
+    // Open WhatsApp in a new tab
+    window.open(whatsappUrl, '_blank')
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!user) {
-      router.push(`/login?redirect=/properties/${property._id}`)
+      router.push(`/auth/login?redirect=/properties/${property._id}`)
       return
     }
 
@@ -117,9 +164,13 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
       if (result.success) {
         setSubmitted(true)
         onSuccess?.()
-        alert (result.message)
+        
+        // Send WhatsApp message with all details
+        sendWhatsAppMessage()
+        
+        alert(result.message)
       } else if (!result.success) {
-          alert (result.message)
+          alert(result.message)
       }
     } catch (error) {
       console.error('Failed to submit request:', error)
@@ -154,6 +205,41 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
           Your rental request for <span className="font-semibold text-emerald-700">{property.title}</span> has been sent successfully.
         </p>
         
+        {/* WhatsApp Notification Card */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 mb-6 border border-green-200">
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3">
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.588 1.922.861 3.149.861 3.182 0 5.767-2.586 5.768-5.766.001-3.18-2.585-5.766-5.768-5.766zM12.031 18.5c-1.197 0-2.391-.328-3.428-.938l-2.453.645.656-2.367c-.662-1.056-1.009-2.236-1.009-3.461 0-3.563 2.9-6.463 6.464-6.463 1.728 0 3.351.673 4.571 1.893s1.893 2.843 1.893 4.571c0 3.563-2.9 6.464-6.464 6.464z"/>
+              </svg>
+            </div>
+            <div className="text-left">
+              <h4 className="font-bold text-green-800">WhatsApp Notification Sent!</h4>
+              <p className="text-sm text-green-700">We&apos;ve sent your request details to Irorun Homes</p>
+            </div>
+          </div>
+          
+          <p className="text-sm text-gray-700 mb-4 text-left">
+            Your rental request details have been sent via WhatsApp to our team for faster processing.
+          </p>
+          
+          <a
+            href="https://wa.me/2348167436407"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:opacity-90 transition-all font-medium shadow-md"
+          >
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.588 1.922.861 3.149.861 3.182 0 5.767-2.586 5.768-5.766.001-3.18-2.585-5.766-5.768-5.766zM12.031 18.5c-1.197 0-2.391-.328-3.428-.938l-2.453.645.656-2.367c-.662-1.056-1.009-2.236-1.009-3.461 0-3.563 2.9-6.463 6.464-6.463 1.728 0 3.351.673 4.571 1.893s1.893 2.843 1.893 4.571c0 3.563-2.9 6.464-6.464 6.464z"/>
+            </svg>
+            Chat with Irorun Homes on WhatsApp
+          </a>
+          
+          <p className="text-xs text-green-600 mt-3">
+            Our team will respond within 24-48 hours via WhatsApp or phone call.
+          </p>
+        </div>
+        
         {/* Next Steps Card */}
         <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-6 mb-6 border border-emerald-200 shadow-inner">
           <div className="flex items-center mb-4">
@@ -168,25 +254,25 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
               <div className="flex-shrink-0 w-5 h-5 bg-emerald-200 rounded-full flex items-center justify-center mr-2 mt-0.5">
                 <span className="text-xs font-bold text-emerald-800">1</span>
               </div>
-              <span><span className="font-medium">Review:</span> Our team will review your request within 24-48 hours</span>
+              <span><span className="font-medium">WhatsApp Confirmation:</span> Check your WhatsApp for request confirmation</span>
             </li>
             <li className="flex items-start text-sm text-emerald-700">
               <div className="flex-shrink-0 w-5 h-5 bg-emerald-200 rounded-full flex items-center justify-center mr-2 mt-0.5">
                 <span className="text-xs font-bold text-emerald-800">2</span>
               </div>
-              <span><span className="font-medium">Contact:</span> A property manager will reach out to schedule an inspection</span>
+              <span><span className="font-medium">Review:</span> Our team will review your request within 24-48 hours</span>
             </li>
             <li className="flex items-start text-sm text-emerald-700">
               <div className="flex-shrink-0 w-5 h-5 bg-emerald-200 rounded-full flex items-center justify-center mr-2 mt-0.5">
                 <span className="text-xs font-bold text-emerald-800">3</span>
               </div>
-              <span><span className="font-medium">Inspection:</span> View the property at your convenience</span>
+              <span><span className="font-medium">Contact:</span> A property manager will reach out to schedule an inspection</span>
             </li>
             <li className="flex items-start text-sm text-emerald-700">
               <div className="flex-shrink-0 w-5 h-5 bg-emerald-200 rounded-full flex items-center justify-center mr-2 mt-0.5">
                 <span className="text-xs font-bold text-emerald-800">4</span>
               </div>
-              <span><span className="font-medium">Decision:</span> Receive feedback on your request status</span>
+              <span><span className="font-medium">Inspection:</span> View the property at your convenience</span>
             </li>
           </ul>
           
@@ -194,7 +280,7 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
             <p className="text-xs text-amber-800 flex items-start">
               <ShieldCheckIcon className="w-4 h-4 mr-1 flex-shrink-0 mt-0.5" />
               <span>
-                <span className="font-bold">Important:</span> Irorun Homes & Properties will never request payment before an inspection. 
+                <span className="font-bold">Important:</span> Irorun Homes will never request payment before an inspection. 
                 Please report any suspicious requests to our support team.
               </span>
             </p>
@@ -224,6 +310,13 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
           >
             Continue Browsing
           </button>
+        </div>
+        
+        {/* Contact Info */}
+        <div className="mt-4 text-center">
+          <p className="text-xs text-gray-400">
+            Need immediate assistance? Call or WhatsApp: <span className="font-medium text-emerald-600">08167436407</span>
+          </p>
         </div>
       </div>
     )
@@ -287,6 +380,19 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
                 {property.status === 'available' ? 'Available Now' : 'Limited Availability'}
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* WhatsApp Quick Notice */}
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-200 flex items-center justify-between">
+        <div className="flex items-center">
+          <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.588 1.922.861 3.149.861 3.182 0 5.767-2.586 5.768-5.766.001-3.18-2.585-5.766-5.768-5.766zM12.031 18.5c-1.197 0-2.391-.328-3.428-.938l-2.453.645.656-2.367c-.662-1.056-1.009-2.236-1.009-3.461 0-3.563 2.9-6.463 6.464-6.463 1.728 0 3.351.673 4.571 1.893s1.893 2.843 1.893 4.571c0 3.563-2.9 6.464-6.464 6.464z"/>
+          </svg>
+          <div>
+            <p className="text-sm font-medium text-green-800">Instant WhatsApp Notification</p>
+            <p className="text-xs text-green-700">Your request will be sent to our team via WhatsApp</p>
           </div>
         </div>
       </div>
@@ -490,8 +596,10 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
             </>
           ) : (
             <>
-              <CheckCircleIcon className="w-5 h-5 mr-2" />
-              Submit Request
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.588 1.922.861 3.149.861 3.182 0 5.767-2.586 5.768-5.766.001-3.18-2.585-5.766-5.768-5.766zM12.031 18.5c-1.197 0-2.391-.328-3.428-.938l-2.453.645.656-2.367c-.662-1.056-1.009-2.236-1.009-3.461 0-3.563 2.9-6.463 6.464-6.463 1.728 0 3.351.673 4.571 1.893s1.893 2.843 1.893 4.571c0 3.563-2.9 6.464-6.464 6.464z"/>
+              </svg>
+              Submit & Send to WhatsApp
             </>
           )}
         </button>

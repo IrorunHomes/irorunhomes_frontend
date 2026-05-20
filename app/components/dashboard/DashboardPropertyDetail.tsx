@@ -4,9 +4,9 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { useProperty } from '../../../context/PropertyContext'
-import { useUser } from '../../../context/UserContext'
-import { Property, ApartmentType } from '../../../types/property'
+import { useProperty } from '../../context/PropertyContext'
+import { useUser } from '../../context/UserContext'
+import { Property, ApartmentType } from '../../types/property'
 import {
   ArrowLeftIcon,
   HeartIcon as HeartOutlineIcon,
@@ -22,10 +22,8 @@ import {
   CalendarIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
-import Navbar from '../../../components/Home/navbar'
-import Footer from '../../../components/Home/footer'
-import { RentalRequestProvider } from '../../../context/RentalRequestContext'
-import RentalRequestForm from '../../../components/Property/RentalRequestForm'
+import { RentalRequestProvider } from '../../context/RentalRequestContext'
+import RentalRequestForm from '../../components/Property/RentalRequestForm'
 
 // Map apartment types to display names
 const apartmentTypeLabels: Record<ApartmentType, string> = {
@@ -39,7 +37,7 @@ const apartmentTypeLabels: Record<ApartmentType, string> = {
 }
 
 // Inner component that uses the rental request context
-export function PropertyDetailContent() {
+export function DashboardPropertyDetailContent() {
   const params = useParams()
   const router = useRouter()
   const { user } = useUser()
@@ -98,11 +96,11 @@ export function PropertyDetailContent() {
   // Handle rental request
   const handleRentalRequest = () => {
     if (!user) {
-    router.push(`/auth/login?redirect=/properties/${params.id}/request`)
+    router.push(`/auth/login?redirect=/dashboard/tenant/properties/${params.id}/request`)
       return
     }
 
-  router.push(`/properties/${params.id}/request`)
+  router.push(`/dashboard/tenant/properties/${params.id}/request`)
   }
 
   // Format price
@@ -159,7 +157,6 @@ export function PropertyDetailContent() {
 
   return (
     <>
-      <Navbar/>
       <div className="min-h-screen bg-gray-50">
         {/* Navigation Header */}
         <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
@@ -523,8 +520,6 @@ export function PropertyDetailContent() {
           <span>Request submitted successfully!</span>
         </div>
       )}
-
-      <Footer/>
     </>
   )
 }
@@ -533,7 +528,7 @@ export function PropertyDetailContent() {
 export default function PropertyDetailPage() {
   return (
     <RentalRequestProvider>
-      <PropertyDetailContent />
+      <DashboardPropertyDetailContent />
     </RentalRequestProvider>
   )
 }

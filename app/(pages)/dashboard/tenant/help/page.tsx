@@ -141,42 +141,42 @@ const supportArticles = [
     title: 'Getting Started Guide',
     description: 'Learn the basics of using SackAgent platform',
     icon: AcademicCapIcon,
-    link: '/help/guides/getting-started',
+    link: '/pricing',
     readTime: '5 min'
   },
   {
     title: 'How to Find Your Perfect Property',
     description: 'Tips and tricks for effective property search',
     icon: MagnifyingGlassIcon,
-    link: '/help/guides/property-search',
+    link: '/dashboard/tenant',
     readTime: '4 min'
   },
   {
     title: 'Understanding Rental Requests',
     description: 'Complete guide to the rental application process',
     icon: DocumentTextIcon,
-    link: '/help/guides/rental-requests',
+    link: '/dashboard/tenant/help',
     readTime: '6 min'
   },
   {
     title: 'Payment and Verification Process',
     description: 'How to make payments and get verified',
     icon: CheckCircleSolidIcon,
-    link: '/help/guides/payments',
+    link: '/pricing',
     readTime: '3 min'
   },
   {
     title: 'Lease Management Guide',
     description: 'Managing your active leases and renewals',
     icon: LifebuoyIcon,
-    link: '/help/guides/leases',
+    link: '/dashboard/tenant/help',
     readTime: '4 min'
   },
   {
     title: 'Account Security Best Practices',
     description: 'Keep your account safe and secure',
     icon: ShieldCheckIcon,
-    link: '/help/guides/security',
+    link: '/dashboard/tenant/help',
     readTime: '3 min'
   }
 ]
@@ -213,7 +213,7 @@ export default function TenantHelpPage() {
   })
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText('support@sackagent.com')
+    navigator.clipboard.writeText('support@irorunhomes.com')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -262,7 +262,7 @@ export default function TenantHelpPage() {
             <h3 className="font-semibold text-gray-900 mb-1">Email Support</h3>
             <p className="text-sm text-gray-500 mb-3">Get a response within 24h</p>
             <div className="flex items-center justify-between">
-              <span className="text-emerald-600 font-medium">support@sackagent.com</span>
+              <span className="text-emerald-600 font-medium">support@irorunhomes.com</span>
               <button
                 onClick={handleCopyEmail}
                 className="p-2 hover:bg-emerald-50 rounded-lg transition-colors relative"
@@ -283,8 +283,8 @@ export default function TenantHelpPage() {
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">Phone Support</h3>
             <p className="text-sm text-gray-500 mb-3">Mon-Fri, 9am-6pm</p>
-            <a href="tel:+2341234567890" className="text-blue-600 font-medium hover:underline">
-              +234 123 456 7890
+            <a href="tel:+23408167436407" className="text-blue-600 font-medium hover:underline">
+              +234 0816-743 6407
             </a>
           </div>
 
@@ -452,7 +452,7 @@ export default function TenantHelpPage() {
                 Contact Support
               </button>
               <Link
-                href="/help/guides"
+                href="/dashboard/tenant/help"
                 className="px-6 py-3 border border-emerald-600 text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors font-medium"
               >
                 Browse All Guides

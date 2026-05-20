@@ -108,35 +108,35 @@ const Hero = () => {
   }
 
   // Show loading state while fetching
-  if (isLoading || (loadingProperties && properties.length === 0)) {
-    return (
-      <>
-        <section className="relative min-h-[90vh] overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0">
-              <Image
-                src={heroBackground}
-                alt="San Francisco Bay Area landscape"
-                fill
-                priority
-                className="object-cover object-center"
-                sizes="100vw"
-                quality={90}
-                placeholder="blur"
-              />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-green-900/60 to-teal-900/70"></div>
-          </div>
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-20 md:pt-32">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-              <p className="text-white mt-4">Loading properties...</p>
-            </div>
-          </div>
-        </section>
-      </>
-    )
-  }
+  // if (isLoading || (loadingProperties && properties.length === 0)) {
+  //   return (
+  //     <>
+  //       <section className="relative min-h-[90vh] overflow-hidden">
+  //         <div className="absolute inset-0 z-0">
+  //           <div className="absolute inset-0">
+  //             <Image
+  //               src={heroBackground}
+  //               alt="San Francisco Bay Area landscape"
+  //               fill
+  //               priority
+  //               className="object-cover object-center"
+  //               sizes="100vw"
+  //               quality={90}
+  //               placeholder="blur"
+  //             />
+  //           </div>
+  //           <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-green-900/60 to-teal-900/70"></div>
+  //         </div>
+  //         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-20 md:pt-32">
+  //           <div className="text-center">
+  //             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+  //             <p className="text-white mt-4">Loading properties...</p>
+  //           </div>
+  //         </div>
+  //       </section>
+  //     </>
+  //   )
+  // }
 
   return (
     <>
@@ -168,7 +168,7 @@ const Hero = () => {
           {/* Main Heading - Optimized for Mobile */}
           <div className="text-center mb-10 md:mb-12">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight drop-shadow-lg">
-              Rent, Buy/Sell <br className="hidden sm:block" />
+              Rent, Buy/Sell <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-green-200 to-teal-300">
                 No Agent Fee & Inspection
               </span>
@@ -179,7 +179,7 @@ const Hero = () => {
           </div>
 
           {/* Search Bar Component */}
-          <div className="max-w-4xl mx-auto px-2 sm:px-4">
+          <div className="max-w-4xl mx-auto px-2 sm:px-4 md:px-6 pb-4">
             <SearchBar onSearch={handleSearch} initialFilters={activeFilters || undefined} />
           </div>
         </div>
@@ -238,10 +238,16 @@ const Hero = () => {
           )}
 
           {/* Property Listings - Pass the click handler */}
-          <PropertyListings 
-            properties={filteredProperties}
-            onCardClick={handleCardClick}
-          />
+          {isLoading || (loadingProperties && properties.length === 0) ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+            </div>
+          ) : (
+            <PropertyListings 
+              properties={filteredProperties}
+              onCardClick={handleCardClick}
+            />
+          )}
         </div>
       </div>
     </>

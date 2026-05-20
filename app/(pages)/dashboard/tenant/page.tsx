@@ -1,12 +1,14 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import DashboardLayout from '../../../(pages)/dashboard/DashboardLayout'
 import PropertyListings from '../../../components/Property/PropertyListings'
 import { useProperty } from '../../../context/PropertyContext'
 import { Property } from '../../../types/property'
 
 export default function TenantDashboard() {
+  const router = useRouter()
   const { properties, fetchProperties, loadingProperties } = useProperty()
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -15,6 +17,17 @@ export default function TenantDashboard() {
   const [selectedBedrooms, setSelectedBedrooms] = useState('all')
   const [showFilters, setShowFilters] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+
+  // Handle card click - navigate to property details
+  const handleCardClick = (propertyId: string) => {
+    router.push(`/dashboard/tenant/properties/${propertyId}`)
+  }
+
+  // Handle favorite click
+  const handleFavoriteClick = (propertyId: string, isCurrentlyFavorite: boolean) => {
+    console.log(`Favorite clicked for property ${propertyId}`)
+    // Add your favorite logic here
+  }
 
   // Fetch properties on mount
   useEffect(() => {
@@ -117,11 +130,6 @@ export default function TenantDashboard() {
       </DashboardLayout>
     )
   }
-
-  // Show debug info (remove in production)
-  console.log('Total properties:', properties.length)
-  console.log('Available properties:', availableProperties.length)
-  console.log('Filtered properties:', filteredProperties.length)
 
   return (
     <DashboardLayout activeTab="dashboard" onTabChange={() => {}}>
@@ -283,7 +291,11 @@ export default function TenantDashboard() {
 
         {/* Properties Section */}
         {filteredProperties.length > 0 ? (
-          <PropertyListings properties={filteredProperties} />
+          <PropertyListings 
+            properties={filteredProperties}
+            onCardClick={handleCardClick}
+            onFavoriteClick={handleFavoriteClick}
+          />
         ) : availableProperties.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <div className="text-gray-400 mb-4">
