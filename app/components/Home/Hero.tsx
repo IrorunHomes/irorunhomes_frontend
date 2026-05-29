@@ -31,7 +31,7 @@ const Hero = () => {
   // Initialize with available properties when properties are loaded
   useEffect(() => {
     if (properties && properties.length > 0) {
-      const availableProps = properties.filter(p => p.status === 'available')
+      const availableProps = properties.filter(p => p.status === 'rented' || p.status === 'available')
       // Limit to 4 featured properties
       setFilteredProperties(availableProps.slice(0, 4))
     }

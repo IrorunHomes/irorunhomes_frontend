@@ -23,7 +23,7 @@ export default function PropertiesPage() {
 
   // Initialize with all available properties
   useEffect(() => {
-    const availableProps = properties.filter(p => p.status === 'available')
+    const availableProps = properties.filter(p => p.status === 'available' || p.status === 'rented')
     setFilteredProperties(availableProps)
   }, [properties])
 

@@ -42,7 +42,7 @@ export default function TenantDashboard() {
   // Use useMemo to memoize available properties
   const availableProperties = useMemo(() => {
     if (!properties || properties.length === 0) return []
-    return properties.filter(p => p.status === 'available')
+    return properties.filter(p => p.status === 'available' || p.status === 'rented')
   }, [properties])
 
   // Apply filters
