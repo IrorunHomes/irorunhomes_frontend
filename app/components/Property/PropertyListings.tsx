@@ -1,4 +1,4 @@
-// components/Property/PropertyListings.tsx
+
 'use client'
 
 import React from 'react'

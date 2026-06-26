@@ -36,7 +36,7 @@ authApi.interceptors.response.use(
     if (error.response?.status === 401) {
       console.error('Authentication failed - redirecting to login')
       if (typeof window !== 'undefined') {
-        window.location.href = '/login?session=expired'
+        window.location.href = '/auth/login?session=expired'
       }
     }
     return Promise.reject(error)

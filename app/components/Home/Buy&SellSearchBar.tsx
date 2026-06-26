@@ -2,57 +2,41 @@
 
 import React, { useState} from 'react'
 import { useProperty } from '../../context/PropertyContext'
-import { ApartmentType } from '../../types/property'
+import { PropertyType } from '../../types/property'
 
-interface SearchBarProps {
+interface BuySellSearchBarProps {
   onSearch?: (filters: SearchFilters) => void
   initialFilters?: SearchFilters
 }
 
 export interface SearchFilters {
-  type: ApartmentType | 'all'
+  type: PropertyType | 'all'
   city: string
   minPrice: number | null
   maxPrice: number | null
-  bedrooms: number | 'all'
 }
 
-const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
+const BuySellSearchBar = ({ onSearch, initialFilters }: BuySellSearchBarProps) => {
   const { properties } = useProperty()
-  const [selectedType, setSelectedType] = useState<ApartmentType | 'all'>(initialFilters?.type || 'all')
+  const [selectedType, setSelectedType] = useState<PropertyType | 'all'>(initialFilters?.type || 'all')
   const [selectedCity, setSelectedCity] = useState<string>(initialFilters?.city || 'all')
   const [priceRange, setPriceRange] = useState({ 
     min: initialFilters?.minPrice?.toString() || '', 
     max: initialFilters?.maxPrice?.toString() || '' 
   })
-  const [bedrooms, setBedrooms] = useState<number | 'all'>(initialFilters?.bedrooms || 'all')
   const [showFilters, setShowFilters] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
 
   // Extract unique cities from properties
   const uniqueCities = Array.from(new Set(properties.map(p => p.city).filter(Boolean)))
-
   const propertyTypeOptions = [
     { value: 'all', label: 'All Types' },
-    { value: 'a-room', label: 'Single Room' },
-    { value: 'office', label: 'Office Space' },
-    { value: 'complex', label: 'Complex' },
-    { value: 'shop', label: 'Shop' },
-    { value: 'self-contained', label: 'Self Contained' },
-    { value: 'room-and-parlour', label: 'Room & Parlour' },
-    { value: 'two-bedroom', label: '2 Bedroom' },
-    { value: 'three-bedroom', label: '3 Bedroom' },
-    { value: 'flat', label: 'Flat' },
-    { value: 'others', label: 'Other' }
-  ]
-
-  const bedroomOptions = [
-    { value: 'all', label: 'Any' },
-    { value: '1', label: '1+' },
-    { value: '2', label: '2+' },
-    { value: '3', label: '3+' },
-    { value: '4', label: '4+' },
-    { value: '5', label: '5+' }
+    { value: 'apartment', label: 'Apartment' },
+    { value: 'land', label: 'Land' },
+    { value: 'house', label: 'House' },
+    { value: 'commercial', label: 'Commercial' },
+    { value: 'industrial', label: 'Industrial' },
+    { value: 'other', label: 'Other' }
   ]
 
   const handleSearch = () => {
@@ -63,7 +47,6 @@ const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
       city: selectedCity,
       minPrice: priceRange.min ? parseInt(priceRange.min) : null,
       maxPrice: priceRange.max ? parseInt(priceRange.max) : null,
-      bedrooms: bedrooms
     }
     
     if (onSearch) {
@@ -77,7 +60,6 @@ const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
     setSelectedType('all')
     setSelectedCity('all')
     setPriceRange({ min: '', max: '' })
-    setBedrooms('all')
     
     if (onSearch) {
       onSearch({
@@ -85,7 +67,6 @@ const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
         city: 'all',
         minPrice: null,
         maxPrice: null,
-        bedrooms: 'all'
       })
     }
   }
@@ -94,8 +75,7 @@ const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
     return selectedType !== 'all' || 
            selectedCity !== 'all' || 
            priceRange.min || 
-           priceRange.max || 
-           bedrooms !== 'all'
+           priceRange.max
   }
 
   const getTypeLabel = () => {
@@ -119,7 +99,7 @@ const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
           </label>
           <select
             value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value as ApartmentType | 'all')}
+            onChange={(e) => setSelectedType(e.target.value as PropertyType | 'all')}
             className="w-full px-3 py-2.5 sm:py-3 bg-emerald-50 border border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300 appearance-none text-gray-900 text-sm sm:text-base"
           >
             {propertyTypeOptions.map(option => (
@@ -149,29 +129,6 @@ const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
             {uniqueCities.map(city => (
               <option key={city} value={city}>
                 {city}
-              </option>
-            ))}
-          </select>
-          <div className="absolute right-2 top-1/2 md:top-1/2 transform -translate-y-1/2 pointer-events-none">
-            <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Bedrooms Dropdown */}
-        <div className="flex-1 relative">
-          <label className="block text-xs font-medium text-emerald-700 mb-1 md:hidden">
-            Bedrooms
-          </label>
-          <select
-            value={bedrooms}
-            onChange={(e) => setBedrooms(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-            className="w-full px-3 py-2.5 sm:py-3 bg-emerald-50 border border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300 appearance-none text-gray-900 text-sm sm:text-base"
-          >
-            {bedroomOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
               </option>
             ))}
           </select>
@@ -274,34 +231,40 @@ const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
           <div className="overflow-x-auto pb-2">
             <div className="flex gap-2 min-w-max">
               <button
-                onClick={() => setPriceRange({ min: '0', max: '100000' })}
+                onClick={() => setPriceRange({ min: '0', max: '1000000' })}
                 className="px-2.5 py-1 text-xs border border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors whitespace-nowrap"
               >
-                Under ₦100k
+                Under ₦1m
               </button>
               <button
-                onClick={() => setPriceRange({ min: '100000', max: '200000' })}
+                onClick={() => setPriceRange({ min: '1000000', max: '5000000' })}
                 className="px-2.5 py-1 text-xs border border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors whitespace-nowrap"
               >
-                ₦100k - ₦200k
+                ₦1m - ₦5m
               </button>
               <button
-                onClick={() => setPriceRange({ min: '200000', max: '300000' })}
+                onClick={() => setPriceRange({ min: '5000000', max: '10000000' })}
                 className="px-2.5 py-1 text-xs border border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors whitespace-nowrap"
               >
-                ₦200k - ₦300k
+                ₦5m - ₦10m
               </button>
               <button
-                onClick={() => setPriceRange({ min: '300000', max: '500000' })}
+                onClick={() => setPriceRange({ min: '50000000', max: '100000000' })}
                 className="px-2.5 py-1 text-xs border border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors whitespace-nowrap"
               >
-                ₦300k - ₦500k
+                ₦10m - ₦50m
               </button>
               <button
-                onClick={() => setPriceRange({ min: '500000', max: '1000000' })}
+                onClick={() => setPriceRange({ min: '50000000', max: '100000000' })}
                 className="px-2.5 py-1 text-xs border border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors whitespace-nowrap"
               >
-                ₦500k - ₦1M
+                ₦50m - ₦100m
+              </button>
+                <button
+                onClick={() => setPriceRange({ min: '100000000', max: '' })}
+                className="px-2.5 py-1 text-xs border border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors whitespace-nowrap"
+              >
+                Over ₦100m
               </button>
             </div>
           </div>
@@ -326,17 +289,6 @@ const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
                   <button
                     onClick={() => setSelectedCity('all')}
                     className="ml-1.5 text-purple-500 hover:text-purple-700"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-              {bedrooms !== 'all' && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-indigo-100 text-indigo-700">
-                  {bedrooms}+ Beds
-                  <button
-                    onClick={() => setBedrooms('all')}
-                    className="ml-1.5 text-indigo-500 hover:text-indigo-700"
                   >
                     ×
                   </button>
@@ -372,4 +324,4 @@ const SearchBar = ({ onSearch, initialFilters }: SearchBarProps) => {
   )
 }
 
-export default SearchBar
+export default BuySellSearchBar

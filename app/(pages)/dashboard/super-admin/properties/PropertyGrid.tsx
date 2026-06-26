@@ -17,7 +17,7 @@ import {
   MapPinIcon,
   UserCircleIcon
 } from '@heroicons/react/24/outline'
-import { Property, PropertyStatus, ApartmentType } from '../../../../types/property'
+import { Property, PropertyStatus, ApartmentType, PropertyType } from '../../../../types/property'
 
 interface PropertyGridProps {
   viewMode: 'grid' | 'list'
@@ -36,17 +36,30 @@ const statusConfig: Record<PropertyStatus, { color: string; icon: typeof CheckCi
   available: { color: 'bg-green-100 text-green-800', icon: CheckCircleIcon, label: 'Available' },
   rented: { color: 'bg-blue-100 text-blue-800', icon: CheckCircleIcon, label: 'Rented' },
   maintenance: { color: 'bg-red-100 text-red-800', icon: XCircleIcon, label: 'Maintenance' },
-  pending: { color: 'bg-amber-100 text-amber-800', icon: ClockIcon, label: 'Pending' }
+  pending: { color: 'bg-amber-100 text-amber-800', icon: ClockIcon, label: 'Pending' },
+  bought: { color: 'bg-purple-100 text-purple-800', icon: CheckCircleIcon, label: 'Bought' },
 }
 
 const apartmentTypeLabels: Record<ApartmentType, string> = {
   'a-room': 'A Room',
+  'office': 'Office Space',
+  'complex': 'Complex',
+  'shop': 'Shop',
   'self-contained': 'Self Contained',
   'room-and-parlour': 'Room & Parlour',
   'two-bedroom': 'Two Bedroom',
   'three-bedroom': 'Three Bedroom',
   'flat': 'Flat',
   'others': 'Others'
+}
+
+const propertyTypeLabels: Record<PropertyType, string> = {
+  'apartment': 'Apartment',
+  'land': 'Land',
+  'house': 'House',
+  'commercial': 'Commercial',
+  'industrial': 'Industrial',
+  'other': 'Other'
 }
 
 export default function PropertyGrid({ 
@@ -117,6 +130,16 @@ export default function PropertyGrid({
     }).format(amount)
   }
 
+  // Get the type label based on propertyFor
+  const getTypeLabel = (property: Property) => {
+    if (property.propertyFor === 'rent') {
+      return apartmentTypeLabels[property.apartmentType as ApartmentType] || property.apartmentType
+    } else if (property.propertyFor === 'sale') {
+      return propertyTypeLabels[property.propertyType as PropertyType] || property.propertyType
+    }
+    return 'Property'
+  }
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -168,6 +191,7 @@ export default function PropertyGrid({
                 )}
                 <th className="text-left p-4 font-medium text-emerald-700">Property</th>
                 <th className="text-left p-4 font-medium text-emerald-700">Type</th>
+                <th className="text-left p-4 font-medium text-emerald-700">For</th>
                 <th className="text-left p-4 font-medium text-emerald-700">Status</th>
                 <th className="text-left p-4 font-medium text-emerald-700">Price</th>
                 <th className="text-left p-4 font-medium text-emerald-700">Views</th>
@@ -179,8 +203,9 @@ export default function PropertyGrid({
             </thead>
             <tbody className="divide-y divide-emerald-100">
               {properties.map((property) => {
-                const StatusIcon = statusConfig[property.status].icon
-                const statusColor = statusConfig[property.status].color
+                const StatusIcon = statusConfig[property.status]?.icon || CheckCircleIcon
+                const statusColor = statusConfig[property.status]?.color || 'bg-gray-100 text-gray-800'
+                const typeLabel = getTypeLabel(property)
                 
                 return (
                   <tr 
@@ -227,19 +252,28 @@ export default function PropertyGrid({
                     </td>
                     <td className="p-4">
                       <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm capitalize whitespace-nowrap">
-                        {apartmentTypeLabels[property.apartmentType]}
+                        {typeLabel}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
+                        property.propertyFor === 'rent' 
+                          ? 'bg-blue-100 text-blue-700' 
+                          : 'bg-purple-100 text-purple-700'
+                      }`}>
+                        {property.propertyFor === 'rent' ? 'For Rent' : 'For Sale'}
                       </span>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center space-x-2">
-                        <StatusIcon className={`w-4 h-4 ${statusColor.replace('bg-', 'text-').replace(' text-', '')}`} />
+                        <StatusIcon className={`w-4 h-4 ${statusColor.replace('bg-', 'text-').split(' ')[0]}`} />
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor} whitespace-nowrap`}>
-                          {statusConfig[property.status].label}
+                          {statusConfig[property.status]?.label || property.status}
                         </span>
                       </div>
                     </td>
                     <td className="p-4 font-medium text-emerald-900 whitespace-nowrap">
-                      {formatCurrency(property.price)}/mo
+                      {formatCurrency(property.price)}
                     </td>
                     <td className="p-4 text-emerald-700">
                       <div className="flex items-center">
@@ -303,8 +337,9 @@ export default function PropertyGrid({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {properties.map((property) => {
-        const StatusIcon = statusConfig[property.status].icon
-        const statusColor = statusConfig[property.status].color
+        const StatusIcon = statusConfig[property.status]?.icon || CheckCircleIcon
+        const statusColor = statusConfig[property.status]?.color || 'bg-gray-100 text-gray-800'
+        const typeLabel = getTypeLabel(property)
         
         return (
           <div
@@ -349,7 +384,7 @@ export default function PropertyGrid({
                 <div className="flex items-center space-x-1 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm">
                   <StatusIcon className={`w-3 h-3 ${statusColor.replace('bg-', 'text-').split(' ')[0]}`} />
                   <span className={`text-xs font-medium ${statusColor.replace('bg-', '').replace(' text-', '')}`}>
-                    {statusConfig[property.status].label}
+                    {statusConfig[property.status]?.label || property.status}
                   </span>
                 </div>
               </div>
@@ -357,7 +392,18 @@ export default function PropertyGrid({
               {/* Price Badge */}
               <div className="absolute bottom-3 left-3">
                 <span className="px-3 py-1.5 bg-white/90 backdrop-blur-sm text-emerald-900 rounded-lg font-bold shadow-sm">
-                  {formatCurrency(property.price)}<span className="text-xs font-normal text-emerald-600 ml-1">/mo</span>
+                  {formatCurrency(property.price)}
+                </span>
+              </div>
+
+              {/* Property For Badge */}
+              <div className="absolute bottom-3 right-3">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium shadow-sm ${
+                  property.propertyFor === 'rent' 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-purple-500 text-white'
+                }`}>
+                  {property.propertyFor === 'rent' ? 'RENT' : 'SALE'}
                 </span>
               </div>
             </div>
@@ -414,9 +460,16 @@ export default function PropertyGrid({
               
               {/* Property Type & Actions */}
               <div className="flex items-center justify-between pt-3 border-t border-emerald-100">
-                <div>
+                <div className="flex flex-wrap gap-1.5">
                   <span className="px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs rounded-full capitalize">
-                    {apartmentTypeLabels[property.apartmentType]}
+                    {typeLabel}
+                  </span>
+                  <span className={`px-3 py-1.5 text-xs rounded-full font-medium ${
+                    property.propertyFor === 'rent' 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    {property.propertyFor === 'rent' ? 'Rent' : 'Sale'}
                   </span>
                 </div>
                 
@@ -463,7 +516,7 @@ export default function PropertyGrid({
                       {property.landlordInfo.personalInfo.fullName}
                     </span>
                   </div>
-                  {property.landlordInfo.verification?.verified && (
+                  {property.landlordInfo?.verification?.verified && (
                     <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
                       Verified
                     </span>

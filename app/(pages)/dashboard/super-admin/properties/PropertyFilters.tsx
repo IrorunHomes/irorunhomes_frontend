@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState } from 'react'
@@ -10,7 +9,7 @@ import {
   HomeModernIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline'
-import { ApartmentType, PropertyStatus } from '../../../../types/property'
+import { ApartmentType, PropertyStatus, PropertyType } from '../../../../types/property'
 
 interface PropertyFiltersProps {
   onFilterChange: (filters: PropertyFilters) => void
@@ -24,6 +23,8 @@ export interface PropertyFilters {
   bedrooms: number
   bathrooms: number
   apartmentType: ApartmentType | ''
+  propertyType: PropertyType | ''
+  propertyFor: 'rent' | 'sale' | ''
   status: PropertyStatus | ''
   city: string
   sortBy: 'price' | 'listedDate' | 'views' | ''
@@ -32,21 +33,35 @@ export interface PropertyFilters {
   endDate?: Date
 }
 
+// Apartment types for Rent
 const apartmentTypes: { value: ApartmentType; label: string }[] = [
-  { value: 'a-room', label: 'A Room' },
+  { value: 'a-room', label: 'Single Room' },
+  { value: 'office', label: 'Office Space' },
+  { value: 'complex', label: 'Complex' },
+  { value: 'shop', label: 'Shop' },
   { value: 'self-contained', label: 'Self Contained' },
   { value: 'room-and-parlour', label: 'Room & Parlour' },
-  { value: 'two-bedroom', label: 'Two Bedroom' },
-  { value: 'three-bedroom', label: 'Three Bedroom' },
+  { value: 'two-bedroom', label: '2 Bedroom' },
+  { value: 'three-bedroom', label: '3 Bedroom' },
   { value: 'flat', label: 'Flat' },
-  { value: 'others', label: 'Others' }
+  { value: 'others', label: 'Other' }
+]
+
+// Property types for Sale
+const propertyTypes: { value: PropertyType; label: string }[] = [
+  { value: 'apartment', label: 'Apartment' },
+  { value: 'land', label: 'Land' },
+  { value: 'house', label: 'House' },
+  { value: 'commercial', label: 'Commercial' },
+  { value: 'industrial', label: 'Industrial' },
+  { value: 'other', label: 'Other' }
 ]
 
 const statusOptions: { value: PropertyStatus; label: string }[] = [
   { value: 'available', label: 'Available' },
   { value: 'rented', label: 'Rented' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'maintenance', label: 'Maintenance' }
+  { value: 'bought', label: 'Bought' },
+  { value: 'pending', label: 'Pending' }
 ]
 
 const sortOptions = [
@@ -64,6 +79,8 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
     bedrooms: 0,
     bathrooms: 0,
     apartmentType: '',
+    propertyType: '',
+    propertyFor: '',
     status: '',
     city: '',
     sortBy: '',
@@ -71,7 +88,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
     ...initialFilters
   })
 
-  const handleFilterChange = (key: keyof PropertyFilters, value: string) => {
+  const handleFilterChange = (key: keyof PropertyFilters, value: string | number) => {
     const newFilters = { ...filters, [key]: value }
     setFilters(newFilters)
     onFilterChange(newFilters)
@@ -85,6 +102,8 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
       bedrooms: 0,
       bathrooms: 0,
       apartmentType: '',
+      propertyType: '',
+      propertyFor: '',
       status: '',
       city: '',
       sortBy: '',
@@ -96,7 +115,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
 
   const hasActiveFilters = () => {
     return Object.values(filters).some(value => 
-      value !== '' && value !== 'desc' // Exclude default sort order
+      value !== '' && value !== 'desc' && value !== 0 // Exclude default values
     )
   }
 
@@ -120,22 +139,74 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
 
         {/* Quick Filters */}
         <div className="flex flex-wrap gap-2">
+          {/* Property For (Rent/Sale) */}
           <div className="relative">
             <HomeModernIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-emerald-400" />
             <select
-              value={filters.apartmentType}
-              onChange={(e) => handleFilterChange('apartmentType', e.target.value)}
+              value={filters.propertyFor}
+              onChange={(e) => {
+                const value = e.target.value as 'rent' | 'sale' | ''
+                handleFilterChange('propertyFor', value)
+                // Reset type filters when switching
+                if (value === 'rent') {
+                  handleFilterChange('propertyType', '')
+                } else if (value === 'sale') {
+                  handleFilterChange('apartmentType', '')
+                }
+              }}
               className="pl-10 pr-8 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300 appearance-none"
             >
-              <option value="">All Types</option>
-              {apartmentTypes.map(type => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
+              <option value="">All Properties</option>
+              <option value="rent">For Rent</option>
+              <option value="sale">For Sale</option>
             </select>
           </div>
 
+          {/* Apartment Type (Rent) */}
+          {(filters.propertyFor === 'rent' || filters.propertyFor === '') && (
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-emerald-400" 
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <select
+                value={filters.apartmentType}
+                onChange={(e) => handleFilterChange('apartmentType', e.target.value)}
+                className="pl-10 pr-8 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300 appearance-none"
+              >
+                <option value="">All Types</option>
+                {apartmentTypes.map(type => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Property Type (Sale) */}
+          {(filters.propertyFor === 'sale' || filters.propertyFor === '') && (
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-emerald-400" 
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <select
+                value={filters.propertyType}
+                onChange={(e) => handleFilterChange('propertyType', e.target.value as PropertyType | '')}
+                className="pl-10 pr-8 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300 appearance-none"
+              >
+                <option value="">All Types</option>
+                {propertyTypes.map(type => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Status */}
           <div className="relative">
             <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-emerald-400" 
                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,6 +226,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
             </select>
           </div>
 
+          {/* City */}
           <div className="relative">
             <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-emerald-400" />
             <input
@@ -166,6 +238,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
             />
           </div>
 
+          {/* Sort By */}
           <div className="relative">
             <select
               value={filters.sortBy}
@@ -181,6 +254,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
             </select>
           </div>
 
+          {/* Sort Order */}
           {filters.sortBy && (
             <button
               onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -190,6 +264,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
             </button>
           )}
 
+          {/* Advanced Toggle */}
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
             className="px-4 py-2.5 flex items-center border border-emerald-200 text-emerald-600 rounded-xl hover:bg-emerald-50 transition-colors"
@@ -198,6 +273,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
             Advanced
           </button>
 
+          {/* Clear Filters */}
           {hasActiveFilters() && (
             <button
               onClick={clearFilters}
@@ -211,13 +287,24 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
       </div>
 
       {/* Active Filters Display */}
-      {(filters.search || filters.apartmentType || filters.status || filters.city) && (
+      {(filters.search || filters.apartmentType || filters.propertyType || filters.propertyFor || filters.status || filters.city) && (
         <div className="mt-4 flex flex-wrap gap-2">
           {filters.search && (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-emerald-100 text-emerald-700">
-              Search: &quot;{filters.search}&quot;
+              Search: &ldquo;{filters.search}&ldquo;
               <button
                 onClick={() => handleFilterChange('search', '')}
+                className="ml-2 text-emerald-500 hover:text-emerald-700"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          {filters.propertyFor && (
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-emerald-100 text-emerald-700">
+              {filters.propertyFor === 'rent' ? 'For Rent' : 'For Sale'}
+              <button
+                onClick={() => handleFilterChange('propertyFor', '')}
                 className="ml-2 text-emerald-500 hover:text-emerald-700"
               >
                 ×
@@ -230,6 +317,17 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
               <button
                 onClick={() => handleFilterChange('apartmentType', '')}
                 className="ml-2 text-blue-500 hover:text-blue-700"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          {filters.propertyType && (
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-700">
+              Type: {propertyTypes.find(t => t.value === filters.propertyType)?.label}
+              <button
+                onClick={() => handleFilterChange('propertyType', '')}
+                className="ml-2 text-indigo-500 hover:text-indigo-700"
               >
                 ×
               </button>
@@ -267,7 +365,7 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
             {/* Price Range */}
             <div>
               <label className="block text-sm font-medium text-emerald-700 mb-2">
-                Price Range
+                Price Range (₦)
               </label>
               <div className="flex space-x-2">
                 <div className="relative flex-1">
@@ -275,9 +373,10 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
                   <input
                     type="number"
                     placeholder="Min"
-                    value={filters.minPrice}
-                    onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                    value={filters.minPrice || ''}
+                    onChange={(e) => handleFilterChange('minPrice', parseInt(e.target.value) || 0)}
                     className="w-full pl-8 pr-2 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                    min="0"
                   />
                 </div>
                 <div className="relative flex-1">
@@ -285,9 +384,10 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
                   <input
                     type="number"
                     placeholder="Max"
-                    value={filters.maxPrice}
-                    onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                    value={filters.maxPrice || ''}
+                    onChange={(e) => handleFilterChange('maxPrice', parseInt(e.target.value) || 0)}
                     className="w-full pl-8 pr-2 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                    min="0"
                   />
                 </div>
               </div>
@@ -299,11 +399,11 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
                 Bedrooms
               </label>
               <select
-                value={filters.bedrooms}
-                onChange={(e) => handleFilterChange('bedrooms', e.target.value)}
+                value={filters.bedrooms || ''}
+                onChange={(e) => handleFilterChange('bedrooms', parseInt(e.target.value) || 0)}
                 className="w-full px-3 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
               >
-                <option value="">Any</option>
+                <option value="0">Any</option>
                 <option value="1">1+</option>
                 <option value="2">2+</option>
                 <option value="3">3+</option>
@@ -318,11 +418,11 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
                 Bathrooms
               </label>
               <select
-                value={filters.bathrooms}
-                onChange={(e) => handleFilterChange('bathrooms', e.target.value)}
+                value={filters.bathrooms || ''}
+                onChange={(e) => handleFilterChange('bathrooms', parseInt(e.target.value) || 0)}
                 className="w-full px-3 py-2 border border-emerald-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
               >
-                <option value="">Any</option>
+                <option value="0">Any</option>
                 <option value="1">1+</option>
                 <option value="2">2+</option>
                 <option value="3">3+</option>
@@ -340,6 +440,9 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
                   <input
                     type="checkbox"
                     className="w-4 h-4 text-emerald-600 border-emerald-300 rounded focus:ring-emerald-500"
+                    onChange={(e) => {
+                      // Handle parking filter
+                    }}
                   />
                   <span className="ml-2 text-sm text-emerald-700">Parking</span>
                 </label>
@@ -347,6 +450,9 @@ export default function PropertyFilters({ onFilterChange, initialFilters }: Prop
                   <input
                     type="checkbox"
                     className="w-4 h-4 text-emerald-600 border-emerald-300 rounded focus:ring-emerald-500"
+                    onChange={(e) => {
+                      // Handle kitchen filter
+                    }}
                   />
                   <span className="ml-2 text-sm text-emerald-700">Kitchen</span>
                 </label>

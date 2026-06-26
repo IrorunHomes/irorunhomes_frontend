@@ -6,13 +6,11 @@ import { useRentalRequest } from '../../context/RentalRequestContext'
 import { useUser } from '../../context/UserContext'
 import { Property } from '../../types/property'
 import { 
-  CalendarIcon, 
   ClockIcon, 
   DocumentTextIcon,
   CheckCircleIcon,
   HomeModernIcon,
   ExclamationCircleIcon,
-  BuildingOfficeIcon,
   MapPinIcon,
   CurrencyDollarIcon,
   ShieldCheckIcon,
@@ -45,17 +43,17 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
   const [submitted, setSubmitted] = useState(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
-  // Calculate minimum move-in date (10 days from now)
+  // Calculate minimum move-in date (2 days from now)
   const getMinMoveInDate = () => {
     const date = new Date()
-    date.setDate(date.getDate() + 10)
+    date.setDate(date.getDate() + 2)
     return date.toISOString().split('T')[0]
   }
 
   // Calculate max move-in date (3 months from now)
   const getMaxMoveInDate = () => {
     const date = new Date()
-    date.setMonth(date.getMonth() + 3)
+    date.setMonth(date.getMonth() + 1)
     return date.toISOString().split('T')[0]
   }
 
@@ -114,20 +112,22 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
 🏢 *PROPERTY DETAILS*
 • Property: ${property.title}
 • Location: ${property.address}, ${property.city}
+• Property For: ${property.propertyFor === 'rent' ? 'For Rent' : 'For Sale'}
+• Property Type: ${property.propertyType}
 • Price: ${formatPrice(property.price)}/year
-• Bedrooms: ${property.features.bedrooms}
-• Bathrooms: ${property.features.bathrooms}
-• Parking: ${property.features.parking ? 'Yes' : 'No'}
-• Kitchen: ${property.features.kitchen ? 'Yes' : 'No'}
+• Bedrooms: ${property.features?.bedrooms || 0}
+• Bathrooms: ${property.features?.bathrooms || 0}
+• Parking: ${property.features?.parking ? 'Yes' : 'No'}
+• Kitchen: ${property.features?.kitchen ? 'Yes' : 'No'}
 
 📋 *REQUEST DETAILS*
-• Move-in Date: ${new Date(formData.requestedMoveInDate).toLocaleDateString()}
+• Deal Date: ${new Date(formData.requestedMoveInDate).toLocaleDateString()}
 • Duration: ${formData.duration === '12' ? '12 months (1 year)' : '24 months (2 years)'}
 • Message: ${formData.message}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⏰ Submitted: ${new Date().toLocaleString()}
-📱 Request ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}
+📱 Request ID: ${Math.random().toString(36).substring(2, 11).toUpperCase()}
     `.trim()
 
     // Encode the message for URL
@@ -169,11 +169,12 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
         sendWhatsAppMessage()
         
         alert(result.message)
-      } else if (!result.success) {
-          alert(result.message)
+      } else {
+        alert(result.message || 'Failed to submit request. Please try again.')
       }
     } catch (error) {
       console.error('Failed to submit request:', error)
+      alert('An error occurred while submitting your request. Please try again.')
     }
   }
 
@@ -291,7 +292,7 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
         <div className="bg-gray-50 rounded-lg p-3 mb-6 inline-block mx-auto">
           <p className="text-xs text-gray-500">Request Reference</p>
           <p className="font-mono text-sm font-bold text-gray-700">
-            {Math.random().toString(36).substr(2, 9).toUpperCase()}
+            {Math.random().toString(36).substring(2, 11).toUpperCase()}
           </p>
         </div>
         
@@ -329,7 +330,7 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
         <div className="flex items-start space-x-4">
           {/* Property Image */}
           <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden flex-shrink-0 shadow-md group">
-            {property.media.images[0] ? (
+            {property.media?.images?.[0] ? (
               <>
                 <Image
                   src={property.media.images[0].url}
@@ -356,18 +357,11 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
               <p className="text-sm line-clamp-1">{property.address}, {property.city}</p>
             </div>
             
-            <div className="flex flex-wrap items-center gap-3 mt-2">
-              <div className="flex items-center bg-emerald-100 px-3 py-1.5 rounded-full">
-                <BuildingOfficeIcon className="w-3.5 h-3.5 text-emerald-700 mr-1" />
-                <span className="text-xs font-medium text-emerald-800">
-                  {property.features.bedrooms} Bed • {property.features.bathrooms} Bath
-                </span>
-              </div>
-              
+            <div className="flex flex-wrap items-center gap-3 mt-2">              
               <div className="flex items-center bg-blue-100 px-3 py-1.5 rounded-full">
                 <CurrencyDollarIcon className="w-3.5 h-3.5 text-blue-700 mr-1" />
                 <span className="text-xs font-medium text-blue-800">
-                  {formatPrice(property.price)}/year
+                  {formatPrice(property.price)}
                 </span>
               </div>
             </div>
@@ -452,44 +446,6 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
         </div>
       </div>
 
-      {/* Move-in Date - Enhanced */}
-      <div className="space-y-2">
-        <label htmlFor="requestedMoveInDate" className="block text-sm font-semibold text-gray-800">
-          Preferred Move-in Date <span className="text-red-500">*</span>
-        </label>
-        <div className="relative group">
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-            <CalendarIcon className={`w-5 h-5 ${errors.requestedMoveInDate && touched.requestedMoveInDate ? 'text-red-400' : 'text-gray-400 group-focus-within:text-emerald-500'} transition-colors`} />
-          </div>
-          <input
-            type="date"
-            id="requestedMoveInDate"
-            name="requestedMoveInDate"
-            value={formData.requestedMoveInDate}
-            onChange={handleChange}
-            onBlur={() => handleBlur('requestedMoveInDate')}
-            min={getMinMoveInDate()}
-            max={getMaxMoveInDate()}
-            className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all ${
-              errors.requestedMoveInDate && touched.requestedMoveInDate
-                ? 'border-red-300 focus:ring-red-100 bg-red-50/30' 
-                : 'border-gray-200 focus:border-emerald-400 focus:ring-emerald-100 bg-white hover:border-gray-300'
-            }`}
-          />
-        </div>
-        {errors.requestedMoveInDate && touched.requestedMoveInDate ? (
-          <p className="text-sm text-red-600 flex items-center animate-shake">
-            <ExclamationCircleIcon className="w-4 h-4 mr-1" />
-            {errors.requestedMoveInDate}
-          </p>
-        ) : (
-          <div className="flex items-center text-xs text-gray-500">
-            <InformationCircleIcon className="w-4 h-4 mr-1 text-emerald-500" />
-            Select a date at least 10 days from today (between {new Date(getMinMoveInDate()).toLocaleDateString()} - {new Date(getMaxMoveInDate()).toLocaleDateString()})
-          </div>
-        )}
-      </div>
-
       {/* Lease Duration - Enhanced */}
       <div className="space-y-2">
         <label htmlFor="duration" className="block text-sm font-semibold text-gray-800">
@@ -512,7 +468,8 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
             }`}
           >
             <option value="12">12 months (1 year) - Recommended</option>
-            <option value="24">24 months (2 years) - Save 5%</option>
+            <option value="20"> Buying</option>
+
           </select>
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -520,12 +477,6 @@ export default function RentalRequestForm({ property, onClose, onSuccess }: Rent
             </svg>
           </div>
         </div>
-        {formData.duration === '24' && (
-          <p className="text-xs text-emerald-600 flex items-center mt-1">
-            <CheckCircleIcon className="w-4 h-4 mr-1" />
-            You save 5% with a 2-year lease! (₦{Math.round(property.price * 0.05).toLocaleString()} savings)
-          </p>
-        )}
         {errors.duration && touched.duration && (
           <p className="text-sm text-red-600 flex items-center">
             <ExclamationCircleIcon className="w-4 h-4 mr-1" />

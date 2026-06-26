@@ -31,7 +31,7 @@ const Hero = () => {
   // Initialize with available properties when properties are loaded
   useEffect(() => {
     if (properties && properties.length > 0) {
-      const availableProps = properties.filter(p => p.status === 'rented' || p.status === 'available')
+      const availableProps = properties.filter(p => p.status === 'available')
       // Limit to 4 featured properties
       setFilteredProperties(availableProps.slice(0, 4))
     }
@@ -41,7 +41,7 @@ const Hero = () => {
     let filtered = [...properties]
     
     // Filter by status - only available
-    filtered = filtered.filter(p => p.status === 'available')
+    filtered = filtered.filter(p => p.status === 'available' || p.status === "rented")
     
     // Apply type filter
     if (filters.type !== 'all') {
@@ -106,37 +106,6 @@ const Hero = () => {
     if (activeFilters.bedrooms !== 'all') count++
     return count
   }
-
-  // Show loading state while fetching
-  // if (isLoading || (loadingProperties && properties.length === 0)) {
-  //   return (
-  //     <>
-  //       <section className="relative min-h-[90vh] overflow-hidden">
-  //         <div className="absolute inset-0 z-0">
-  //           <div className="absolute inset-0">
-  //             <Image
-  //               src={heroBackground}
-  //               alt="San Francisco Bay Area landscape"
-  //               fill
-  //               priority
-  //               className="object-cover object-center"
-  //               sizes="100vw"
-  //               quality={90}
-  //               placeholder="blur"
-  //             />
-  //           </div>
-  //           <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-green-900/60 to-teal-900/70"></div>
-  //         </div>
-  //         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pt-20 md:pt-32">
-  //           <div className="text-center">
-  //             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-  //             <p className="text-white mt-4">Loading properties...</p>
-  //           </div>
-  //         </div>
-  //       </section>
-  //     </>
-  //   )
-  // }
 
   return (
     <>

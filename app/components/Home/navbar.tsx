@@ -6,7 +6,7 @@ import logo from "../../../public/irorun-logo.png";
 import Image from "next/image";
 import Link from "next/link";
 import { useUser } from '../../context/UserContext';
-import { UserCircleIcon, HomeIcon, BuildingOfficeIcon, CurrencyDollarIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 export const IrorunHomesLogo = () => (
   <Link href="/" className="flex items-center space-x-2">
@@ -120,17 +120,17 @@ const Navbar = () => {
                 : 'text-gray-700 hover:text-emerald-700'
             }`}
           >
-            Browse Properties
+            Rent Properties
           </Link>
           <Link 
-            href="/" 
+            href="/properties/buy-properties" 
             className={`transition-all duration-200 font-medium px-3 py-2 rounded-lg hover:bg-emerald-50 text-sm lg:text-base ${
               isScrolled 
                 ? 'text-gray-800 hover:text-emerald-700' 
                 : 'text-gray-700 hover:text-emerald-700'
             }`}
           >
-            Sell/Buy <span className="text-xs text-emerald-600">(coming soon)</span>
+            Buy Properties
           </Link>
           <Link 
             href="/pricing" 
@@ -221,17 +221,17 @@ const Navbar = () => {
               <svg className="w-5 h-5 mr-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
               </svg>
-              Browse Properties
+              Rent Properties
             </Link>
             <Link 
-              href="/sell-buy" 
+              href="/properties/buy-properties" 
               className="text-gray-700 hover:text-emerald-700 font-medium py-3 px-4 rounded-lg hover:bg-emerald-50 transition-colors border-b border-gray-100 flex items-center"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <svg className="w-5 h-5 mr-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Sell/Buy <span className="ml-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">coming soon</span>
+              Buy Properties
             </Link>
             <Link 
               href="/pricing" 

@@ -256,7 +256,7 @@ export default function PropertiesPage() {
     total: adminProperties?.length || 0,
     available: adminProperties?.filter(p => p.status === 'available').length || 0,
     rented: adminProperties?.filter(p => p.status === 'rented').length || 0,
-    maintenance: adminProperties?.filter(p => p.status === 'maintenance').length || 0,
+    maintenance: adminProperties?.filter(p => p.status === 'bought').length || 0,
     pending: adminProperties?.filter(p => p.status === 'pending').length || 0
   }
 
@@ -264,7 +264,7 @@ export default function PropertiesPage() {
     { id: 'all', label: 'All Properties', count: stats.total, icon: BuildingOfficeIcon },
     { id: 'available', label: 'Available', count: stats.available, icon: CheckCircleIcon },
     { id: 'rented', label: 'Rented', count: stats.rented, icon: HomeModernIcon },
-    { id: 'maintenance', label: 'Maintenance', count: stats.maintenance, icon: ExclamationCircleIcon },
+    { id: 'bought', label: 'Bought', count: stats.maintenance, icon: ExclamationCircleIcon },
     { id: 'pending', label: 'Pending', count: stats.pending, icon: ClockIcon },
   ]
 

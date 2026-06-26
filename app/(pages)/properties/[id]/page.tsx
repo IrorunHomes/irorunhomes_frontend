@@ -27,15 +27,30 @@ import Footer from '../../../components/Home/footer'
 import { RentalRequestProvider } from '../../../context/RentalRequestContext'
 import RentalRequestForm from '../../../components/Property/RentalRequestForm'
 
+
 // Map apartment types to display names
 const apartmentTypeLabels: Record<ApartmentType, string> = {
   'a-room': 'Single Room',
+  'shop': 'Shop',
+  'office': 'Office Space',
+  'complex': 'Complex',
   'self-contained': 'Self Contained',
   'room-and-parlour': 'Room & Parlour',
   'two-bedroom': 'Two Bedroom Apartment',
   'three-bedroom': 'Three Bedroom Apartment',
   'flat': 'Apartment Flat',
   'others': 'Other'
+}
+
+
+// Map property types to display names
+const propertyTypeLabels: Record<string, string> = {
+  'apartment': 'Apartment',
+  'land': 'Land',
+  'house': 'House',
+  'commercial': 'Commercial Property',
+  'industrial': 'Industrial Property',
+  'other': 'Other Property'
 }
 
 // Inner component that uses the rental request context
@@ -199,7 +214,7 @@ export function PropertyDetailContent() {
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  Request to Rent
+                  Send Request
                 </button>
               </div>
             </div>
@@ -281,78 +296,146 @@ export function PropertyDetailContent() {
               </div>
 
               {/* Property Features */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">Property Features</h2>
+              {property.propertyFor === 'rent' && (
+                <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                  <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">Property Features</h2>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
-                      <HomeModernIcon className="w-5 h-5 text-emerald-600" />
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                        <HomeModernIcon className="w-5 h-5 text-emerald-600" />
+                      </div>
+
+                      <div>
+                        <div className="text-xs text-gray-500">Property Type</div>
+                        <div className="font-semibold text-gray-900">{apartmentTypeLabels[property.apartmentType]}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Property Type</div>
-                      <div className="font-semibold text-gray-900">{apartmentTypeLabels[property.apartmentType]}</div>
-                    </div>
-                  </div>
                   
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                      <UsersIcon className="w-5 h-5 text-blue-600" />
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <UsersIcon className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Bedrooms</div>
+                        <div className="font-semibold text-gray-900">{property.features.bedrooms}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Bedrooms</div>
-                      <div className="font-semibold text-gray-900">{property.features.bedrooms}</div>
-                    </div>
-                  </div>
                   
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                      <ArrowsPointingOutIcon className="w-5 h-5 text-green-600" />
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                        <ArrowsPointingOutIcon className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Bathrooms</div>
+                        <div className="font-semibold text-gray-900">{property.features.bathrooms}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Bathrooms</div>
-                      <div className="font-semibold text-gray-900">{property.features.bathrooms}</div>
-                    </div>
-                  </div>
                   
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                      <CurrencyDollarIcon className="w-5 h-5 text-purple-600" />
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <CurrencyDollarIcon className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Yearly Rent</div>
+                        <div className="font-semibold text-gray-900">{formatPrice(property.price)}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Yearly Rent</div>
-                      <div className="font-semibold text-gray-900">{formatPrice(property.price)}</div>
-                    </div>
-                  </div>
                   
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
-                      <CalendarIcon className="w-5 h-5 text-amber-600" />
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
+                        <CalendarIcon className="w-5 h-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Listed Date</div>
+                        <div className="font-semibold text-gray-900">{formatDate(property.listedDate)}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Listed Date</div>
-                      <div className="font-semibold text-gray-900">{formatDate(property.listedDate)}</div>
-                    </div>
-                  </div>
                   
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-                      <ShieldCheckIcon className="w-5 h-5 text-red-600" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Status</div>
-                      <div className={`font-semibold ${
-                        property.status === 'available' ? 'text-green-600' :
-                        property.status === 'rented' ? 'text-red-600' :
-                        property.status === 'pending' ? 'text-yellow-600' :
-                        'text-blue-600'
-                      }`}>
-                        {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                        <ShieldCheckIcon className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Status</div>
+                        <div className={`font-semibold ${property.status === 'available' ? 'text-green-600' :
+                            property.status === 'rented' ? 'text-red-600' :
+                              property.status === 'pending' ? 'text-yellow-600' :
+                                'text-blue-600'
+                          }`}>
+                          {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}:{ property.propertyFor === 'sale' && (
+                <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                  <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">Property Features</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                        <HomeModernIcon className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Property Type</div>
+                        <div className="font-semibold text-gray-900">{propertyTypeLabels[property.propertyType]}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <UsersIcon className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Bedrooms</div>
+                        <div className="font-semibold text-gray-900">{property.features.bedrooms}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                        <ArrowsPointingOutIcon className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Bathrooms</div>
+                        <div className="font-semibold text-gray-900">{property.features.bathrooms}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <CurrencyDollarIcon className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Price</div>
+                        <div className="font-semibold text-gray-900">{formatPrice(property.price)}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
+                        <CalendarIcon className="w-5 h-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Listed Date</div>
+                        <div className="font-semibold text-gray-900">{formatDate(property.listedDate)}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                        <ShieldCheckIcon className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Status</div>
+                        <div className={`font-semibold ${property.status === 'available' ? 'text-green-600' :
+                            property.status === 'bought' ? 'text-red-600' :
+                              property.status === 'pending' ? 'text-yellow-600' :
+                              'text-blue-600'
+                          }`}>
+                          {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Amenities */}
               {property.features.amenities && property.features.amenities.length > 0 && (
@@ -439,7 +522,7 @@ export function PropertyDetailContent() {
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  {property.status === 'available' ? 'Request to Rent' : 'Not Available'}
+                  {property.status === 'available' ? 'Send Request' : 'Not Available'}
                 </button>
                 
                 <div className="text-center text-sm text-gray-500">

@@ -2,11 +2,14 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { PropertyCardProps, ApartmentType } from '../../types/property'
+import { PropertyCardProps, ApartmentType, PropertyType } from '../../types/property'
 
 // Map apartment types to display names
 const apartmentTypeLabels: Record<ApartmentType, string> = {
   'a-room': 'Single Room',
+  'office': 'Office Space',
+  'complex': 'Complex',
+  'shop': 'Shop',
   'self-contained': 'Self Contained',
   'room-and-parlour': 'Room & Parlour',
   'two-bedroom': '2 Bedroom',
@@ -15,12 +18,23 @@ const apartmentTypeLabels: Record<ApartmentType, string> = {
   'others': 'Other'
 }
 
+const propertyTypeLabels: Record<PropertyType, string> = {
+  'apartment': 'Apartment',
+  'land': 'Land',
+  'house': 'House',
+  'commercial': 'Commercial',
+  'industrial': 'Industrial',
+  'other': 'Other'
+}
+
 // Map status to colors
 const statusColors: Record<string, string> = {
   available: 'bg-green-100 text-green-800',
   rented: 'bg-gray-100 text-gray-800',
+  bought: 'bg-purple-100 text-purple-800',
   maintenance: 'bg-yellow-100 text-yellow-800',
-  pending: 'bg-blue-100 text-blue-800'
+  pending: 'bg-blue-100 text-blue-800',
+  unavailable: 'bg-red-100 text-red-800'
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({
@@ -38,14 +52,42 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   }
 
   // Get first image or placeholder
-  const mainImage = property.media.images[0]?.url || '/property-placeholder.jpg'
+  const mainImage = property.media?.images?.[0]?.url || '/property-placeholder.jpg'
   
   // Format price
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'NGN',
-    minimumFractionDigits: 0
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(property.price)
+
+  // Get the correct type label based on propertyFor
+  const getTypeLabel = () => {
+    if (property.propertyFor === 'rent') {
+      return apartmentTypeLabels[property.apartmentType as ApartmentType] || property.apartmentType
+    } else if (property.propertyFor === 'sale') {
+      return propertyTypeLabels[property.propertyType as PropertyType] || property.propertyType
+    }
+    return 'Property'
+  }
+
+  // Get the type icon based on propertyFor
+  const getTypeIcon = () => {
+    if (property.propertyFor === 'rent') {
+      return (
+        <svg className="w-2.5 h-2.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" />
+        </svg>
+      )
+    } else {
+      return (
+        <svg className="w-2.5 h-2.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    }
+  }
 
   return (
     <div 
@@ -70,8 +112,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           
           {/* Status Badge */}
           <div className="absolute top-2 left-2">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold ${statusColors[property.status]}`}>
-              {property.status.toUpperCase()}
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold ${statusColors[property.status] || 'bg-gray-100 text-gray-800'}`}>
+              {property.status?.toUpperCase() || 'AVAILABLE'}
             </span>
           </div>
           
@@ -112,12 +154,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           <div className="absolute bottom-2 left-2">
             <div className="px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-lg shadow-sm">
               <span className="text-lg font-bold text-emerald-700">{formattedPrice}</span>
-              <span className="text-xs text-gray-600 ml-1">/Yearly</span>
+              <span className="text-xs text-gray-600 ml-1">/{property.propertyFor === 'rent' ? 'Yearly' : 'Sale'}</span>
             </div>
           </div>
           
           {/* Image Counter */}
-          {property.media.images.length > 1 && (
+          {property.media?.images?.length > 1 && (
             <div className="absolute bottom-2 right-2">
               <div className="px-2 py-1 bg-black/70 text-white rounded-full text-xs backdrop-blur-sm">
                 +{property.media.images.length - 1}
@@ -142,16 +184,25 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           </p>
         </div>
 
-        {/* Property Type */}
+        {/* Property Type Badges */}
         <div className="flex flex-wrap gap-1.5 mb-3">
+          {/* Main Type Badge */}
           <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium text-xs">
-            <svg className="w-2.5 h-2.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            {apartmentTypeLabels[property.apartmentType]}
+            {getTypeIcon()}
+            {getTypeLabel()}
           </span>
           
-          {property.features.parking && (
+          {/* Property For Badge */}
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium text-xs ${
+            property.propertyFor === 'rent' 
+              ? 'bg-blue-50 text-blue-700' 
+              : 'bg-purple-50 text-purple-700'
+          }`}>
+            {property.propertyFor === 'rent' ? 'For Rent' : 'For Sale'}
+          </span>
+          
+          {/* Parking Badge */}
+          {property.features?.parking && (
             <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium text-xs">
               <svg className="w-2.5 h-2.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -159,48 +210,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               Parking
             </span>
           )}
-        </div>
-
-        {/* Features */}
-        <div className="flex items-center justify-between border-gray-100">
-          {/* Bedrooms */}
-          <div className="flex items-center space-x-1.5">
-            <div className="w-8 h-8 bg-emerald-50 rounded flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          
+          {/* Kitchen Badge */}
+          {property.features?.kitchen && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 font-medium text-xs">
+              <svg className="w-2.5 h-2.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-            </div>
-            <div>
-              <div className="text-sm font-bold text-gray-900">{property.features.bedrooms}</div>
-              <div className="text-[10px] text-gray-500">Beds</div>
-            </div>
-          </div>
-
-          {/* Bathrooms */}
-          <div className="flex items-center space-x-1.5">
-            <div className="w-8 h-8 bg-blue-50 rounded flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div>
-              <div className="text-sm font-bold text-gray-900">{property.features.bathrooms}</div>
-              <div className="text-[10px] text-gray-500">Baths</div>
-            </div>
-          </div>
-
-          {/* Square Footage (if available) */}
-          <div className="flex items-center space-x-1.5">
-            <div className="w-8 h-8 bg-green-50 rounded flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <div>
-              <div className="text-sm font-bold text-gray-900">{property.features.toilet || 'N/A'}</div>
-              <div className="text-[10px] text-gray-500">Toilets</div>
-            </div>
-          </div>
+              Kitchen
+            </span>
+          )}
         </div>
       </div>
     </div>

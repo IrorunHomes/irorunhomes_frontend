@@ -28,6 +28,9 @@ import RentalRequestForm from '../../components/Property/RentalRequestForm'
 // Map apartment types to display names
 const apartmentTypeLabels: Record<ApartmentType, string> = {
   'a-room': 'Single Room',
+  'office': 'Office Space',
+  'complex': 'Complex',
+  'shop': 'Shop',
   'self-contained': 'Self Contained',
   'room-and-parlour': 'Room & Parlour',
   'two-bedroom': 'Two Bedroom Apartment',

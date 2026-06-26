@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -7,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useProperty } from '../../../../../context/PropertyContext'
 import { useUser } from '../../../../../context/UserContext'
-import { Property, ApartmentType } from '../../../../../types/property'
+import { Property, ApartmentType, PropertyType } from '../../../../../types/property'
 import DashboardLayout from '../../../DashboardLayout'
 import {
   ArrowLeftIcon,
@@ -28,13 +27,15 @@ import {
   DocumentTextIcon,
   CreditCardIcon,
   CameraIcon,
-  // CarIcon is not available, use TruckIcon instead or remove it
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid'
 
 // Map apartment types to display names
 const apartmentTypeLabels: Record<ApartmentType, string> = {
   'a-room': 'Single Room',
+  'office': 'Office Space',
+  'complex': 'Complex',
+  'shop': 'Shop',
   'self-contained': 'Self Contained',
   'room-and-parlour': 'Room & Parlour',
   'two-bedroom': 'Two Bedroom Apartment',
@@ -43,12 +44,24 @@ const apartmentTypeLabels: Record<ApartmentType, string> = {
   'others': 'Other'
 }
 
+// Map property types to display names
+const propertyTypeLabels: Record<PropertyType, string> = {
+  'apartment': 'Apartment',
+  'land': 'Land',
+  'house': 'House',
+  'commercial': 'Commercial',
+  'industrial': 'Industrial',
+  'other': 'Other'
+}
+
 // Status configuration
-const statusConfig = {
+const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }>; label: string }> = {
   available: { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircleSolidIcon, label: 'Available' },
   rented: { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: HomeModernIcon, label: 'Rented' },
   maintenance: { color: 'bg-red-100 text-red-800 border-red-200', icon: XCircleIcon, label: 'Maintenance' },
-  pending: { color: 'bg-amber-100 text-amber-800 border-amber-200', icon: ClockIcon, label: 'Pending' }
+  pending: { color: 'bg-amber-100 text-amber-800 border-amber-200', icon: ClockIcon, label: 'Pending' },
+  bought: { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: CheckCircleSolidIcon, label: 'Bought' },
+  unavailable: { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: XCircleIcon, label: 'Unavailable' }
 }
 
 export default function AdminPropertyDetailPage() {
@@ -146,17 +159,24 @@ export default function AdminPropertyDetailPage() {
     })
   }
 
-// Helper function to safely render objects as strings
-const renderObjectAsString = (obj: unknown): string => {
-  if (!obj) return 'N/A'
-  
-  if (typeof obj === 'string') return obj
-  if (typeof obj === 'number') return obj.toString()
-  if (typeof obj === 'boolean') return obj.toString()
-  
-  return String(obj)
-}
+  // Helper function to safely render objects as strings
+  const renderObjectAsString = (obj: unknown): string => {
+    if (!obj) return 'N/A'
+    if (typeof obj === 'string') return obj
+    if (typeof obj === 'number') return obj.toString()
+    if (typeof obj === 'boolean') return obj.toString()
+    return String(obj)
+  }
 
+  // Get type label based on propertyFor
+  const getTypeLabel = (property: Property) => {
+    if (property.propertyFor === 'rent') {
+      return apartmentTypeLabels[property.apartmentType as ApartmentType] || property.apartmentType
+    } else if (property.propertyFor === 'sale') {
+      return propertyTypeLabels[property.propertyType as PropertyType] || property.propertyType
+    }
+    return 'Property'
+  }
 
   if (loading) {
     return (
@@ -182,7 +202,7 @@ const renderObjectAsString = (obj: unknown): string => {
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Property Not Found</h3>
             <p className="text-gray-600 mb-6">{error || 'The property you are looking for does not exist.'}</p>
             <Link
-              href="/dashboard/admin/properties"
+              href="/dashboard/super-admin/properties"
               className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
             >
               <ArrowLeftIcon className="w-5 h-5 mr-2" />
@@ -194,7 +214,9 @@ const renderObjectAsString = (obj: unknown): string => {
     )
   }
 
-  const StatusIcon = statusConfig[property.status].icon
+  const StatusIcon = statusConfig[property.status]?.icon || CheckCircleSolidIcon
+  const statusColor = statusConfig[property.status]?.color || 'bg-gray-100 text-gray-800 border-gray-200'
+  const statusLabel = statusConfig[property.status]?.label || property.status
 
   return (
     <DashboardLayout activeTab="properties" onTabChange={() => {}}>
@@ -204,7 +226,7 @@ const renderObjectAsString = (obj: unknown): string => {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
               <Link
-                href="/dashboard/admin/properties"
+                href="/dashboard/super-admin/properties"
                 className="p-2 hover:bg-emerald-50 rounded-lg transition-colors"
               >
                 <ArrowLeftIcon className="w-5 h-5 text-emerald-600" />
@@ -214,9 +236,16 @@ const renderObjectAsString = (obj: unknown): string => {
                   <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
                     {property.title}
                   </h1>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusConfig[property.status].color}`}>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
                     <StatusIcon className="w-3.5 h-3.5 mr-1.5" />
-                    {statusConfig[property.status].label}
+                    {statusLabel}
+                  </span>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                    property.propertyFor === 'rent' 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    {property.propertyFor === 'rent' ? 'For Rent' : 'For Sale'}
                   </span>
                 </div>
                 <div className="flex items-center text-gray-600 mt-2">
@@ -250,8 +279,11 @@ const renderObjectAsString = (obj: unknown): string => {
           <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Annual Rent</p>
+                <p className="text-sm text-gray-500">{property.propertyFor === 'rent' ? 'Annual Rent' : 'Sale Price'}</p>
                 <p className="text-xl font-bold text-emerald-700 mt-1">{formatPrice(property.price)}</p>
+                {property.propertyFor === 'rent' && (
+                  <p className="text-xs text-gray-400">per year</p>
+                )}
               </div>
               <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
                 <CurrencyDollarIcon className="w-5 h-5 text-emerald-600" />
@@ -264,7 +296,7 @@ const renderObjectAsString = (obj: unknown): string => {
               <div>
                 <p className="text-sm text-gray-500">Property Type</p>
                 <p className="text-lg font-semibold text-gray-900 mt-1 capitalize">
-                  {apartmentTypeLabels[property.apartmentType]}
+                  {getTypeLabel(property)}
                 </p>
               </div>
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -306,7 +338,7 @@ const renderObjectAsString = (obj: unknown): string => {
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               {/* Main Image */}
               <div className="relative h-[400px] bg-gray-100">
-                {property.media.images.length > 0 ? (
+                {property.media?.images?.length > 0 ? (
                   <>
                     <Image
                       src={property.media.images[selectedImageIndex].url}
@@ -330,7 +362,7 @@ const renderObjectAsString = (obj: unknown): string => {
               </div>
               
               {/* Thumbnail Images */}
-              {property.media.images.length > 1 && (
+              {property.media?.images?.length > 1 && (
                 <div className="p-4 border-t border-gray-100">
                   <div className="flex space-x-2 overflow-x-auto pb-2">
                     {property.media.images.map((image, index) => (
@@ -357,7 +389,7 @@ const renderObjectAsString = (obj: unknown): string => {
               )}
 
               {/* Video Section */}
-              {property.media.videos && property.media.videos.length > 0 && (
+              {property.media?.videos && property.media.videos.length > 0 && (
                 <div className="p-4 border-t border-gray-100">
                   <h3 className="text-sm font-medium text-gray-700 mb-3">Property Video</h3>
                   <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
@@ -428,7 +460,7 @@ const renderObjectAsString = (obj: unknown): string => {
                         <div className="bg-emerald-50 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
                             <HomeModernIcon className="w-5 h-5 text-emerald-600" />
-                            <span className="text-lg font-bold text-emerald-700">{property.features.bedrooms}</span>
+                            <span className="text-lg font-bold text-emerald-700">{property.features?.bedrooms || 0}</span>
                           </div>
                           <p className="text-sm text-emerald-700">Bedrooms</p>
                         </div>
@@ -437,7 +469,7 @@ const renderObjectAsString = (obj: unknown): string => {
                             <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <span className="text-lg font-bold text-blue-700">{property.features.bathrooms}</span>
+                            <span className="text-lg font-bold text-blue-700">{property.features?.bathrooms || 0}</span>
                           </div>
                           <p className="text-sm text-blue-700">Bathrooms</p>
                         </div>
@@ -446,15 +478,14 @@ const renderObjectAsString = (obj: unknown): string => {
                             <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
-                            <span className="text-lg font-bold text-purple-700">{property.features.toilet || 0}</span>
+                            <span className="text-lg font-bold text-purple-700">{property.features?.toilet || 0}</span>
                           </div>
                           <p className="text-sm text-purple-700">Toilets</p>
                         </div>
                         <div className="bg-amber-50 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
-                            {/* Replace CarIcon with a simple text indicator */}
                             <span className="text-amber-700 font-medium">Parking</span>
-                            <span className="text-lg font-bold text-amber-700">{property.features.parking ? 'Yes' : 'No'}</span>
+                            <span className="text-lg font-bold text-amber-700">{property.features?.parking ? 'Yes' : 'No'}</span>
                           </div>
                           <p className="text-sm text-amber-700">Parking Available</p>
                         </div>
@@ -462,7 +493,7 @@ const renderObjectAsString = (obj: unknown): string => {
                     </div>
 
                     {/* Amenities */}
-                    {property.features.amenities && property.features.amenities.length > 0 && (
+                    {property.features?.amenities && property.features.amenities.length > 0 && (
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">Amenities</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -477,7 +508,7 @@ const renderObjectAsString = (obj: unknown): string => {
                     )}
 
                     {/* Extras */}
-                    {property.features.extras && property.features.extras.length > 0 && (
+                    {property.features?.extras && property.features.extras.length > 0 && (
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">Additional Features</h3>
                         <div className="flex flex-wrap gap-2">
@@ -680,11 +711,11 @@ const renderObjectAsString = (obj: unknown): string => {
                           {property.landlordInfo?.verification?.verified ? 'Verified' : 'Not Verified'}
                         </span>
                       </div>
-                      {property.landlordInfo?.verification?.verified && (
+                      {property.landlordInfo?.verification?.verified && property.landlordInfo?.verification?.verifiedAt && (
                         <div className="mt-3 text-sm text-emerald-700">
-                          <p>Verified by: {renderObjectAsString(property.landlordInfo.verification.verifiedBy)}</p>
+                          <p>Verified by: {renderObjectAsString(property.landlordInfo.verification?.verifiedBy)}</p>
                           <p className="text-xs text-emerald-600 mt-1">
-                            Verified on: {formatDateTime(property.landlordInfo.verification.verifiedAt)}
+                            Verified on: {formatDateTime(property.landlordInfo.verification?.verifiedAt)}
                           </p>
                         </div>
                       )}
@@ -743,10 +774,24 @@ const renderObjectAsString = (obj: unknown): string => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-gray-600">Current Status</span>
-                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${statusConfig[property.status].color}`}>
+                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${statusColor}`}>
                     <StatusIcon className="w-3.5 h-3.5 mr-1.5" />
-                    {statusConfig[property.status].label}
+                    {statusLabel}
                   </span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-gray-600">For</span>
+                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${
+                    property.propertyFor === 'rent' 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    {property.propertyFor === 'rent' ? 'Rent' : 'Sale'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-gray-600">Type</span>
+                  <span className="font-medium text-gray-900">{getTypeLabel(property)}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-gray-600">Listed By</span>

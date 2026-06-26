@@ -1,16 +1,11 @@
 
 export type ApartmentType = 
-  | 'a-room' 
-  | 'self-contained' 
-  | 'room-and-parlour' 
-  | 'two-bedroom' 
-  | 'three-bedroom' 
-  | 'flat' 
-  | 'others'
+'a-room' | "shop" | "office" | 'complex' | 'self-contained' | 'room-and-parlour' | 'two-bedroom' | 'three-bedroom' | 'flat' | "others"
 
-export type PropertyStatus = 'available' | 'rented' | 'maintenance' | 'pending'
-export type PaymentSchedule = 'monthly' | 'quarterly' | 'yearly'
-
+export type PropertyStatus = 'available' | 'rented' | 'maintenance' | 'pending' | 'bought'
+export type PaymentSchedule = 'monthly' | 'quarterly' | 'yearly' | 'one-time'
+export type PropertyFor = 'sale' | 'rent'
+export type PropertyType = 'apartment' | 'land' | 'house' | 'commercial' | 'industrial' | 'other'
 // Media Types
 export interface MediaItem {
   url: string
@@ -108,6 +103,8 @@ export interface Property {
   apartmentCount?: number
   features: PropertyFeatures
   media: PropertyMedia
+  propertyFor: PropertyFor
+  propertyType: PropertyType
   status: PropertyStatus
   admin: string
   pendingRequests: string[]
@@ -137,6 +134,9 @@ export interface PropertyFlatData {
   state: string
   country?: string
   apartmentType: ApartmentType
+  propertyType: PropertyType
+  propertyFor: PropertyFor
+  status: PropertyStatus
   unitNumber?: string
   apartmentCount?: number
   
@@ -212,6 +212,8 @@ export interface PropertyListParams {
   minPrice?: number
   maxPrice?: number
   apartmentType?: ApartmentType
+  propertyType?: PropertyType
+  propertyFor?: PropertyFor
   bedrooms?: number
   bathrooms?: number
   status?: PropertyStatus
@@ -229,6 +231,9 @@ export interface PropertyFormData {
   state: string
   country?: string
   apartmentType: ApartmentType
+  propertyType: PropertyType
+  propertyFor: PropertyFor
+  status: PropertyStatus
   unitNumber?: string
   apartmentCount?: number
   features: {

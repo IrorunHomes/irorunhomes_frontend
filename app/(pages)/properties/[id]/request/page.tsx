@@ -99,7 +99,7 @@ export default function RentalRequestPage() {
             >
               <XMarkIcon className="w-5 h-5 text-gray-500" />
             </button>
-            <h1 className="text-xl font-bold text-gray-900">Request to Rent</h1>
+            <h1 className="text-xl font-bold text-gray-900">Request</h1>
           </div>
         </div>
 

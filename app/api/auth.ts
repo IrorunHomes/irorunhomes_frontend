@@ -101,7 +101,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && 
         originalRequest && 
         !originalRequest._retry &&
-        !originalRequest.url?.includes('/login') &&
+        !originalRequest.url?.includes('/auth/login') &&
         !originalRequest.url?.includes('/refresh-token')) {
       
       originalRequest._retry = true;
@@ -127,7 +127,7 @@ api.interceptors.response.use(
     }
     
     // Don't redirect on login failures
-    if (error.response?.status === 401 && originalRequest?.url?.includes('/login')) {
+    if (error.response?.status === 401 && originalRequest?.url?.includes('/auth/login')) {
       return Promise.reject(error);
     }
     

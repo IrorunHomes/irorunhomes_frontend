@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import PropertyListings from '../../components/Property/PropertyListings'
-import Navbar from '../../components/Home/navbar'
-import Footer from '../../components/Home/footer'
-import SearchBar, { SearchFilters } from '../../components/Home/SearchBar'
-import { useProperty } from '../../context/PropertyContext'
-import { Property } from '../../types/property'
+import PropertyListings from '../../../components/Property/PropertyListings'
+import Navbar from '../../../components/Home/navbar'
+import Footer from '../../../components/Home/footer'
+import { useProperty } from '../../../context/PropertyContext'
+import { Property } from '../../../types/property'
+import BuySellSearchBar, { SearchFilters } from '../../../components/Home/Buy&SellSearchBar'
 
 export default function PropertiesPage() {
   const { properties, loadingProperties, fetchProperties, addRemoveFavorite } = useProperty()
@@ -23,19 +23,20 @@ export default function PropertiesPage() {
 
   // Initialize with all available properties
   useEffect(() => {
-    const availableProps = properties.filter(p => p.propertyFor === 'rent' || p.status === 'rented')
+    const availableProps = properties.filter(p => p.propertyFor === 'sale' || p.status === 'bought')
     setFilteredProperties(availableProps)
   }, [properties])
 
   const handleSearch = (filters: SearchFilters) => {
     let filtered = [...properties]
     
-    // Filter by status - only available
-    filtered = filtered.filter(p => p.propertyFor === 'rent')
+    // Filter by property for - only for sale
+    filtered = filtered.filter(p => p.propertyFor === 'sale')
     
     // Apply type filter
     if (filters.type !== 'all') {
-      filtered = filtered.filter(p => p.apartmentType === filters.type)
+      const selectedType = filters.type as Property['propertyType']
+      filtered = filtered.filter(p => p.propertyType === selectedType)
     }
     
     // Apply city filter
@@ -49,11 +50,6 @@ export default function PropertiesPage() {
     }
     if (filters.maxPrice) {
       filtered = filtered.filter(p => p.price <= filters.maxPrice!)
-    }
-    
-    // Apply bedrooms filter
-    if (filters.bedrooms !== 'all') {
-      filtered = filtered.filter(p => p.features.bedrooms >= Number(filters.bedrooms!))
     }
     
     setFilteredProperties(filtered)
@@ -75,7 +71,6 @@ export default function PropertiesPage() {
     if (activeFilters.city !== 'all') count++
     if (activeFilters.minPrice) count++
     if (activeFilters.maxPrice) count++
-    if (activeFilters.bedrooms !== 'all') count++
     return count
   }
 
@@ -87,9 +82,10 @@ export default function PropertiesPage() {
           {/* Search Bar Section */}
           <div className="mb-8">
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Property</h1>
-              <p className="text-gray-600 mb-6">Search through our verified properties</p>
-              <SearchBar onSearch={handleSearch} initialFilters={activeFilters || undefined} />
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Property to Buy</h1>
+              <p className="text-gray-600 mb-6">Search through our verified properties and contact us for more information on the property.</p>
+              <p className='font-bold md:text-4xl text-emerald-600'>Or sell your property, <a href="/contact-us" className="text-emerald-600 hover:underline">Contact Us</a></p>
+              <BuySellSearchBar onSearch={handleSearch} initialFilters={activeFilters || undefined} />
               
               {/* Active Filters Display */}
               {activeFilters && getActiveFiltersCount() > 0 && (
@@ -104,11 +100,6 @@ export default function PropertiesPage() {
                     {activeFilters.city !== 'all' && (
                       <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-purple-100 text-purple-700">
                         City: {activeFilters.city}
-                      </span>
-                    )}
-                    {activeFilters.bedrooms !== 'all' && (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-indigo-100 text-indigo-700">
-                        {activeFilters.bedrooms}+ Beds
                       </span>
                     )}
                     {activeFilters.minPrice && (

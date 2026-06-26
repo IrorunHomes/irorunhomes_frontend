@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -19,7 +18,9 @@ import {
   FunnelIcon,
   ArrowPathIcon,
   HomeModernIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid'
 import { User } from '../../../../types/auth'
@@ -28,10 +29,10 @@ export default function AdminUsersPage() {
   const { user, allUsers, userStats, fetchAllUsers, loadingUsers, updateUserStatus, verifyUserKYC } = useUser()
 
   const [searchTerm, setSearchTerm] = useState('')
-  const [roleFilter, setRoleFilter] = useState<'all' | 'tenant' | 'admin'>('tenant')
+  const [roleFilter, setRoleFilter] = useState<'all' | 'tenant' | 'admin'>('all')
   const [statusFilter, setStatusFilter] = useState<'all' | 'verified' | 'pending' | 'suspended'>('all')
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
-  const [selectedUser, setSelectedUser] = useState<User>(null)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [showKYCModal, setShowKYCModal] = useState(false)
   const [actionReason, setActionReason] = useState('')
@@ -43,12 +44,10 @@ export default function AdminUsersPage() {
       fetchAllUsers({
         role: roleFilter,
         status: statusFilter,
-        search: searchTerm,
-        page: currentPage,
-        limit: itemsPerPage
+        search: searchTerm
       })
     }
-  }, [user, roleFilter, statusFilter, searchTerm, currentPage])
+  }, [user, roleFilter, statusFilter, searchTerm])
 
   useEffect(() => {
     if (allUsers) {
@@ -101,10 +100,64 @@ export default function AdminUsersPage() {
     return { label: 'Pending', color: 'bg-yellow-100 text-yellow-800', icon: ClockIcon }
   }
 
+  // Pagination
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
   const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem)
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, roleFilter, statusFilter])
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = []
+    const maxVisible = 5
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      pages.push(1)
+      
+      let start = Math.max(2, currentPage - 1)
+      let end = Math.min(totalPages - 1, currentPage + 1)
+      
+      if (currentPage <= 2) {
+        end = 4
+      }
+      if (currentPage >= totalPages - 1) {
+        start = totalPages - 3
+      }
+      
+      if (start > 2) {
+        pages.push('...')
+      }
+      
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+      
+      if (end < totalPages - 1) {
+        pages.push('...')
+      }
+      
+      pages.push(totalPages)
+    }
+    
+    return pages
+  }
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
+      // Scroll to top of table
+      document.getElementById('users-table')?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   return (
     <DashboardLayout activeTab="users" onTabChange={() => {}}>
@@ -160,6 +213,19 @@ export default function AdminUsersPage() {
             </div>
           )}
 
+
+          <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">Tenant/Buyers</p>
+                <p className="text-2xl font-bold text-emerald-600 mt-1">{userStats?.totalTenants || 0}</p>
+              </div>
+              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                <HomeModernIcon className="w-6 h-6 text-emerald-600" />
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -180,18 +246,6 @@ export default function AdminUsersPage() {
               </div>
               <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
                 <ClockIcon className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Active Leases</p>
-                <p className="text-2xl font-bold text-emerald-600 mt-1">{userStats?.activeLeases || 0}</p>
-              </div>
-              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                <HomeModernIcon className="w-6 h-6 text-emerald-600" />
               </div>
             </div>
           </div>
@@ -259,7 +313,7 @@ export default function AdminUsersPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden" id="users-table">
             {currentUsers.length > 0 ? (
               <>
                 <div className="overflow-x-auto">
@@ -270,7 +324,6 @@ export default function AdminUsersPage() {
                         <th className="text-left p-4 font-medium text-gray-600">Contact</th>
                         <th className="text-left p-4 font-medium text-gray-600">Role</th>
                         <th className="text-left p-4 font-medium text-gray-600">Status</th>
-                        <th className="text-left p-4 font-medium text-gray-600">Stats</th>
                         <th className="text-left p-4 font-medium text-gray-600">Joined</th>
                         <th className="text-left p-4 font-medium text-gray-600">Actions</th>
                       </tr>
@@ -288,7 +341,7 @@ export default function AdminUsersPage() {
                                   {user.avatar ? (
                                     <Image
                                       src={user.avatar}
-                                      alt={user.fullName}
+                                      alt={user.fullName || 'User'}
                                       width={40}
                                       height={40}
                                       className="w-full h-full object-cover"
@@ -298,8 +351,8 @@ export default function AdminUsersPage() {
                                   )}
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-900">{user.fullName}</p>
-                                  <p className="text-xs text-gray-500">ID: {user._id.slice(-8)}</p>
+                                  <p className="font-medium text-gray-900">{user.fullName || 'Unknown User'}</p>
+                                  <p className="text-xs text-gray-500">ID: {user._id?.slice(-8) || 'N/A'}</p>
                                 </div>
                               </div>
                             </td>
@@ -308,7 +361,7 @@ export default function AdminUsersPage() {
                               <div className="space-y-1">
                                 <div className="flex items-center text-sm">
                                   <EnvelopeIcon className="w-4 h-4 text-gray-400 mr-2" />
-                                  <span className="text-gray-600">{user.email}</span>
+                                  <span className="text-gray-600">{user.email || 'No email'}</span>
                                 </div>
                                 {user.phone && (
                                   <div className="flex items-center text-sm">
@@ -412,32 +465,67 @@ export default function AdminUsersPage() {
                   </table>
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
+                {/* Enhanced Pagination */}
                   <div className="px-6 py-4 border-t border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-600">
-                        Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredUsers.length)} of {filteredUsers.length} users
-                      </p>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                          disabled={currentPage === 1}
-                          className="px-3 py-1 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                        >
-                          Previous
-                        </button>
-                        <button
-                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                          disabled={currentPage === totalPages}
-                          className="px-3 py-1 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                        >
-                          Next
-                        </button>
+                    
+                  {/* Full Pagination Controls */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-sm text-gray-600">
+                      Showing <span className="font-medium">{indexOfFirstItem + 1}</span> to{' '}
+                      <span className="font-medium">{Math.min(indexOfLastItem, filteredUsers.length)}</span> of{' '}
+                      <span className="font-medium">{filteredUsers.length}</span> users
+                    </p>
+                    
+                    <div className="flex items-center gap-2">
+                      {/* Previous Button */}
+                      <button
+                        onClick={() => goToPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className={`px-3 py-2 rounded-lg border transition-colors ${
+                          currentPage === 1
+                            ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'border-gray-300 text-gray-700 hover:bg-emerald-50 hover:border-emerald-300'
+                        }`}
+                      >
+                        <ChevronLeftIcon className="w-5 h-5" />
+                      </button>
+                      
+                      {/* Page Numbers */}
+                      <div className="flex items-center gap-1">
+                        {getPageNumbers().map((page, index) => (
+                          page === '...' ? (
+                            <span key={`ellipsis-${index}`} className="px-2 text-gray-400">…</span>
+                          ) : (
+                            <button
+                              key={page}
+                              onClick={() => goToPage(page as number)}
+                              className={`min-w-[36px] h-9 px-3 rounded-lg font-medium transition-all ${
+                                currentPage === page
+                                  ? 'bg-emerald-600 text-white shadow-md'
+                                  : 'text-gray-700 hover:bg-emerald-50'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          )
+                        ))}
                       </div>
+                      
+                      {/* Next Button */}
+                      <button
+                        onClick={() => goToPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className={`px-3 py-2 rounded-lg border transition-colors ${
+                          currentPage === totalPages
+                            ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'border-gray-300 text-gray-700 hover:bg-emerald-50 hover:border-emerald-300'
+                        }`}
+                      >
+                        <ChevronRightIcon className="w-5 h-5" />
+                      </button>
                     </div>
                   </div>
-                )}
+                </div>
               </>
             ) : (
               <div className="p-12 text-center">

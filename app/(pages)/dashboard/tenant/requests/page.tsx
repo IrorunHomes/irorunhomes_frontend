@@ -473,7 +473,7 @@ export default function TenantRequestsPage() {
                 : "You haven't submitted any rental requests yet. Browse available properties and submit your first request!"}
             </p>
             <Link
-              href="/properties"
+              href="/dashboard/tenant"
               className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-700 text-white rounded-lg hover:opacity-90 transition-all font-medium shadow-md hover:shadow-lg"
             >
               <HomeModernIcon className="w-5 h-5 mr-2" />
