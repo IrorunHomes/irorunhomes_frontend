@@ -478,7 +478,6 @@ export function PropertyDetailContent() {
                   <div className="flex flex-col text-2xl md:text-3xl font-bold text-emerald-700">
                     {formatPrice(property.price)}
                   </div>
-                  <span className="text-gray-600">/Per Year</span>
                 </div>
                 
                 <div className="space-y-2">
