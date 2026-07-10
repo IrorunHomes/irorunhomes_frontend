@@ -473,12 +473,17 @@ export function PropertyDetailContent() {
             {/* Right Column - Sidebar */}
             <div className="lg:col-span-1">
               {/* Price Card */}
+              {property.propertyFor === 'rent' && (
               <div className="bg-white rounded-2xl shadow-lg p-6 mb-2 sticky top-24">
                 <div className="text-center mb-6">
                   <div className="flex flex-col text-2xl md:text-3xl font-bold text-emerald-700">
                     {formatPrice(property.price)}
                   </div>
                 </div>
+                
+                  <div className="text-center text-gray-600 mb-6">
+                    <span className="text-sm">per year</span>
+                  </div>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between border-b border-gray-100">
@@ -530,7 +535,63 @@ export function PropertyDetailContent() {
                     : `This property is ${property.status}`
                   }
                 </div>
-              </div>
+                </div>
+              )}
+              {property.propertyFor === 'sale' && (
+                <div className="bg-white rounded-2xl shadow-lg p-6 mb-2 sticky top-24">
+                <div className="text-center mb-6">
+                  <div className="flex flex-col text-2xl md:text-3xl font-bold text-emerald-700">
+                    {formatPrice(property.price)}
+                  </div>
+                  </div>
+                  <div className="text-center text-gray-600 mb-6">
+                    <span className="text-xl text-red-700">For sale</span>
+                  </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Property Type</span>
+                    <span className="font-semibold">{propertyTypeLabels[property.propertyType]}</span>
+                    </div>
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Bedrooms</span>
+                      <span className="font-semibold">{property.features.bedrooms}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Bathrooms</span>
+                    <span className="font-semibold">{property.features.bathrooms}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Parking</span>
+                    <span className="font-semibold">{property.features.parking ? 'Available' : 'Not Available'}</span>
+                    </div>
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Kitchen</span>
+                      <span className="font-semibold">{property.features.kitchen ? 'Included' : 'Not Included'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                      <span className="text-gray-600">Views</span>  
+                      <span className="font-semibold">{property.views}</span>
+                  </div>
+                </div>
+                  <button
+                  onClick={handleRentalRequest}
+                  disabled={property.status !== 'available'}
+                    className={`w-full py-3 font-semibold rounded-lg transition-all shadow-md hover:shadow-lg ${
+                      property.status === 'available'
+                        ? 'bg-gradient-to-r from-emerald-600 to-green-700 text-white hover:opacity-90'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {property.status === 'available' ? 'Send Request' : 'Not Available'}
+                  </button>
+                  <div className="text-center text-sm text-gray-500">
+                    {property.status === 'available'
+                      ? 'This property is currently available for sale'
+                      : `This property is ${property.status}`
+                    }
+                  </div>
+                </div>
+              )}
 
               {/* Location Info */}
               <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
