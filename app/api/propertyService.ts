@@ -96,6 +96,11 @@ interface FavoriteResponse {
   count: number;
 }
 
+interface ViewsResponse {
+  views: Property[];
+  count: number;
+}
+
 interface MessageResponse {
   message: string;
 }
@@ -108,6 +113,7 @@ interface ApiResponse<T> {
   properties?: Property[];
   count?: number;
   favourites?: Property[];
+  views?: Property[];
   property?: Property;
   updatedProperty?: Property;
 }
@@ -145,6 +151,14 @@ class PropertyService {
       return { 
         favourites: apiResponse.favourites, 
         count: apiResponse.count || apiResponse.favourites.length 
+      } as unknown as T;
+    }
+
+    // For views endpoint
+    if (apiResponse.views !== undefined) {
+      return { 
+        views: apiResponse.views, 
+        count: apiResponse.count || apiResponse.views.length 
       } as unknown as T;
     }
 
@@ -419,10 +433,23 @@ class PropertyService {
       if (!propertyId) {
         throw new Error('Property ID is required');
       }
-      const response = await authApi.post<ApiResponse<MessageResponse>>(`/add-favorite/${propertyId}`);
+      const response = await authApi.post<ApiResponse<MessageResponse>>(`/add-favourite/${propertyId}`);
       return this.handleResponse<MessageResponse>(response);
     } catch (error) {
-      console.error(`Error adding favorite ${propertyId}:`, error);
+      console.error(`Error adding favourite ${propertyId}:`, error);
+      throw error;
+    }
+  }
+
+    async incrementViews(propertyId: string): Promise<MessageResponse> {
+    try {
+      if (!propertyId) {
+        throw new Error('Property ID is required');
+      }
+      const response = await authApi.post<ApiResponse<MessageResponse>>(`/increment-views/${propertyId}`);
+      return this.handleResponse<MessageResponse>(response);
+    } catch (error) {
+      console.error(`Error incrementing views for property ${propertyId}:`, error);
       throw error;
     }
   }
@@ -432,7 +459,7 @@ class PropertyService {
       if (!propertyId) {
         throw new Error('Property ID is required');
       }
-      const response = await authApi.delete<ApiResponse<MessageResponse>>(`/remove-favorite/${propertyId}`);
+      const response = await authApi.delete<ApiResponse<MessageResponse>>(`/remove-favourite/${propertyId}`);
       return this.handleResponse<MessageResponse>(response);
     } catch (error) {
       console.error(`Error removing favorite ${propertyId}:`, error);
@@ -446,6 +473,16 @@ class PropertyService {
       return this.handleResponse<FavoriteResponse>(response);
     } catch (error) {
       console.error('Error fetching favorites:', error);
+      throw error;
+    }
+  }
+
+    async getViews(): Promise<ViewsResponse> {
+    try {
+      const response = await authApi.get<ApiResponse<ViewsResponse>>(`/views`);
+      return this.handleResponse<ViewsResponse>(response);
+    } catch (error) {
+      console.error('Error fetching views:', error);
       throw error;
     }
   }

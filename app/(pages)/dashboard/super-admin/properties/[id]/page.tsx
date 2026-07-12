@@ -261,7 +261,7 @@ export default function AdminPropertyDetailPage() {
                 className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-sm"
               >
                 <PencilIcon className="w-5 h-5" />
-                Edit Property
+                Edit
               </button>
               <button
                 onClick={() => setShowDeleteModal(true)}

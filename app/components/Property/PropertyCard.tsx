@@ -2,7 +2,12 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { PropertyCardProps, ApartmentType, PropertyType } from '../../types/property'
+import { PropertyCardProps, ApartmentType, PropertyType } from '../../types/property';
+import { useRouter } from 'next/navigation'
+import { useProperty } from '../../context/PropertyContext'
+import { useUser } from '../../context/UserContext'
+import { HeartIcon as HeartOutlineIcon } from '@heroicons/react/24/outline'
+import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
 
 // Map apartment types to display names
 const apartmentTypeLabels: Record<ApartmentType, string> = {
@@ -40,15 +45,39 @@ const statusColors: Record<string, string> = {
 const PropertyCard: React.FC<PropertyCardProps> = ({
   property,
   isFeatured = false,
-  onFavoriteClick,
   onCardClick
 }) => {
   const [isFavorite, setIsFavorite] = useState(false)
+  const router = useRouter()
+  const { user } = useUser()
+  const { addRemoveFavorite, incrementViewCount } = useProperty()
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsFavorite(!isFavorite)
-    onFavoriteClick?.()
+  // Check if property is in user's favorites
+  const isPropertyFavorite = user?.favourites?.includes(property._id) || false
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent card click from firing
+    if (!user) {
+      router.push('/auth/login?redirect=' + window.location.pathname)
+      return
+    }
+
+    try {
+      const success = await addRemoveFavorite(property._id, isPropertyFavorite)
+      if (success) {
+        setIsFavorite(!isFavorite)
+      }
+    } catch (error) {
+      console.error('Failed to update favorite:', error)
+    }
+  }
+
+  // increment view count when the card is clicked
+  const handleCardClick = async () => {
+    if (onCardClick) {
+      onCardClick()
+    }
+    await incrementViewCount(property._id)
   }
 
   // Get first image or placeholder
@@ -92,7 +121,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   return (
     <div 
       className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer border border-gray-100 hover:border-emerald-200"
-      onClick={onCardClick}
+      onClick={handleCardClick}
     >
       {/* Property Image */}
       <div className="relative h-48 sm:h-56 overflow-hidden">
@@ -129,26 +158,20 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
           )}
           
-          {/* Favorite Button */}
-          <button
-            onClick={handleFavoriteClick}
-            className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm"
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-          >
-            <svg 
-              className={`w-4 h-4 ${isFavorite ? 'text-red-500 fill-red-500' : 'text-gray-600'}`}
-              fill={isFavorite ? "currentColor" : "none"}
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {/* Favorite Button - Fixed */}
+          <div className="absolute top-2 right-2">
+            <button
+              onClick={handleFavoriteClick}
+              className="p-1.5 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer"
+              title={isPropertyFavorite ? "Remove from favorites" : "Add to favorites"}
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
-              />
-            </svg>
-          </button>
+              {isPropertyFavorite ? (
+                <HeartSolidIcon className="w-5 h-5 text-red-500 fill-red-500" />
+              ) : (
+                <HeartOutlineIcon className="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" />
+              )}
+            </button>
+          </div>
           
           {/* Price Tag */}
           <div className="absolute bottom-2 left-2">
@@ -220,6 +243,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               Kitchen
             </span>
           )}
+        </div>
+        
+        {/* Views Count */}
+        <div className="flex items-center text-gray-500 text-sm">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>{property.views || 0} views</span>
         </div>
       </div>
     </div>

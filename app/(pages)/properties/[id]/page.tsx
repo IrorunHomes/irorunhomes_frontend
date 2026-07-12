@@ -200,9 +200,6 @@ export function PropertyDetailContent() {
                   ) : (
                     <HeartOutlineIcon className="w-6 h-6" />
                   )}
-                  <span className="ml-2 hidden sm:inline">
-                    {isFavorite ? 'Saved' : 'Save'}
-                  </span>
                 </button>
                 
                 <button

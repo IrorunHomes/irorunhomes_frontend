@@ -39,6 +39,16 @@ const apartmentTypeLabels: Record<ApartmentType, string> = {
   'others': 'Other'
 }
 
+// Map property types to display names
+const propertyTypeLabels: Record<string, string> = {
+  'apartment': 'Apartment',
+  'land': 'Land',
+  'house': 'House',
+  'commercial': 'Commercial Property',
+  'industrial': 'Industrial Property',
+  'other': 'Other Property'
+}
+
 // Inner component that uses the rental request context
 export function DashboardPropertyDetailContent() {
   const params = useParams()
@@ -87,7 +97,7 @@ export function DashboardPropertyDetailContent() {
     }
 
     try {
-      const success = await addRemoveFavorite(property!._id, isFavorite)
+      const success = await addRemoveFavorite(property!._id, user.favourites?.includes(property._id))
       if (success) {
         setIsFavorite(!isFavorite)
       }
@@ -127,12 +137,9 @@ export function DashboardPropertyDetailContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading property details...</p>
-        </div>
-      </div>
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+          </div>
     )
   }
 
@@ -175,20 +182,23 @@ export function DashboardPropertyDetailContent() {
               </button>
               
               <div className="flex items-center space-x-4">
-                <button
-                  onClick={handleFavoriteClick}
-                  className="flex items-center text-gray-600 hover:text-red-600 transition-colors"
-                  title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                >
-                  {isFavorite ? (
-                    <HeartSolidIcon className="w-6 h-6 text-red-500 fill-red-500" />
-                  ) : (
-                    <HeartOutlineIcon className="w-6 h-6" />
-                  )}
-                  <span className="ml-2 hidden sm:inline">
-                    {isFavorite ? 'Saved' : 'Save'}
-                  </span>
-                </button>
+                {user.favourites?.includes(property._id) ? (
+                  <button
+                    onClick={handleFavoriteClick}
+                    className="flex items-center text-red-600  transition-colors fill-red-500 cursor-pointer"
+                    title="Remove from favorites"
+                  >
+                    <HeartSolidIcon className="w-6 h-6 text-red-500 fill-red-500 hover:fill-white" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleFavoriteClick}
+                    className="flex items-center text-red-600 hover:text-red-700 transition-colors cursor-pointer"
+                    title="Add to favorites"
+                  >
+                    <HeartOutlineIcon className="w-6 h-6  text-red-500 fill-white hover:fill-red-500" />
+                  </button>
+                )}
                 
                 <button
                   onClick={handleRentalRequest}
@@ -390,13 +400,17 @@ export function DashboardPropertyDetailContent() {
             {/* Right Column - Sidebar */}
             <div className="lg:col-span-1">
               {/* Price Card */}
+              {property.propertyFor === 'rent' && (
               <div className="bg-white rounded-2xl shadow-lg p-6 mb-2 sticky top-24">
                 <div className="text-center mb-6">
                   <div className="flex flex-col text-2xl md:text-3xl font-bold text-emerald-700">
                     {formatPrice(property.price)}
                   </div>
-                  <span className="text-gray-600">/Per Year</span>
                 </div>
+                
+                  <div className="text-center text-gray-600 mb-6">
+                    <span className="text-sm">per year</span>
+                  </div>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between border-b border-gray-100">
@@ -439,7 +453,7 @@ export function DashboardPropertyDetailContent() {
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  {property.status === 'available' ? 'Request to Rent' : 'Not Available'}
+                  {property.status === 'available' ? 'Send Request' : 'Not Available'}
                 </button>
                 
                 <div className="text-center text-sm text-gray-500">
@@ -448,7 +462,63 @@ export function DashboardPropertyDetailContent() {
                     : `This property is ${property.status}`
                   }
                 </div>
-              </div>
+                </div>
+              )}
+              {property.propertyFor === 'sale' && (
+                <div className="bg-white rounded-2xl shadow-lg p-6 mb-2 sticky top-24">
+                <div className="text-center mb-6">
+                  <div className="flex flex-col text-2xl md:text-3xl font-bold text-emerald-700">
+                    {formatPrice(property.price)}
+                  </div>
+                  </div>
+                  <div className="text-center text-gray-600 mb-6">
+                    <span className="text-xl text-red-700">For sale</span>
+                  </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Property Type</span>
+                    <span className="font-semibold">{propertyTypeLabels[property.propertyType]}</span>
+                    </div>
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Bedrooms</span>
+                      <span className="font-semibold">{property.features.bedrooms}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Bathrooms</span>
+                    <span className="font-semibold">{property.features.bathrooms}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Parking</span>
+                    <span className="font-semibold">{property.features.parking ? 'Available' : 'Not Available'}</span>
+                    </div>
+                  <div className="flex justify-between border-b border-gray-100">
+                    <span className="text-gray-600">Kitchen</span>
+                      <span className="font-semibold">{property.features.kitchen ? 'Included' : 'Not Included'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                      <span className="text-gray-600">Views</span>  
+                      <span className="font-semibold">{property.views}</span>
+                  </div>
+                </div>
+                  <button
+                  onClick={handleRentalRequest}
+                  disabled={property.status !== 'available'}
+                    className={`w-full py-3 font-semibold rounded-lg transition-all shadow-md hover:shadow-lg ${
+                      property.status === 'available'
+                        ? 'bg-gradient-to-r from-emerald-600 to-green-700 text-white hover:opacity-90'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {property.status === 'available' ? 'Send Request' : 'Not Available'}
+                  </button>
+                  <div className="text-center text-sm text-gray-500">
+                    {property.status === 'available'
+                      ? 'This property is currently available for sale'
+                      : `This property is ${property.status}`
+                    }
+                  </div>
+                </div>
+              )}
 
               {/* Location Info */}
               <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">

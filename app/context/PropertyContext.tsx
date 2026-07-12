@@ -13,6 +13,8 @@ import { useMessage } from '../components/ui/MessagePopup';
 interface PropertyContextType {
   properties: Property[];
   favorites: Property[];
+  views: Property[];
+  incrementViewCount: (propertyId: string) => Promise<void>;
   adminProperties: Property[];
   loadingProperties: boolean;
   loadingFavorites: boolean;
@@ -25,6 +27,8 @@ interface PropertyContextType {
   fetchAdminProperty: (id: string) => Promise<Property>; // New function
   fetchPublicProperty: (id: string) => Promise<Property>;
   addRemoveFavorite: (propertyId: string, isFavorite: boolean) => Promise<boolean>;
+  fetchFavorites: () => Promise<void>;
+  fetchViews: () => Promise<void>;
   listNewProperty: (
     payload: PropertyFlatData,
     imageFiles: File[], 
@@ -47,6 +51,7 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
   const { user, loading: userLoading } = useUser();
   const [properties, setProperties] = useState<Property[]>([]);
   const [favorites, setFavorites] = useState<Property[]>([]);
+  const [views, setViews] = useState<Property[]>([]);
   const [adminProperties, setAdminProperties] = useState<Property[]>([]);
   const [loadingProperties, setLoadingProperties] = useState(false);
   const [loadingFavorites, setLoadingFavorites] = useState(false);
@@ -123,7 +128,15 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  // View public property by id
+  // View public property by id and increment view count
+  const incrementViewCount = useCallback(async (propertyId: string): Promise<void> => {
+    try {
+      await propertyService.incrementViews(propertyId);
+    } catch (error) {
+      console.error(`Error incrementing views for property ${propertyId}:`, error);
+    }
+  }, []);
+
   const fetchPublicProperty = useCallback(async (id: string): Promise<Property> => {
     try {
       const response = await propertyService.getPublicProperty(id);
@@ -217,7 +230,23 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
       return false;
     }
   }, [user, fetchFavorites]);
-  
+
+
+  // fetch properties viewed by the user
+  const fetchViews = useCallback(async () => {
+    if (userLoading || !user) {
+      return;
+    }
+
+    try {
+      const response = await propertyService.getViews();
+      const viewsData = response.views || [];
+      setViews(viewsData);
+    } catch (err: unknown) {
+      console.error('Failed to fetch views:', err);
+    }
+  }, [user, userLoading]);
+
   // New property listing - updated to accept flat data
   const listNewProperty = useCallback(async (
     payload: PropertyFlatData,
@@ -411,9 +440,10 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
   const value: PropertyContextType = {
     properties,
     favorites,
+    views,
     adminProperties,
     fetchAdminProperties,
-    fetchAdminProperty, // Added new function
+    fetchAdminProperty,
     fetchPublicProperty,
     loadingProperties,
     loadingFavorites,
@@ -422,8 +452,11 @@ export function PropertyProvider({ children }: { children: ReactNode }) {
     loadingDelete,
     error,
     fetchProperties,
+    fetchFavorites,
+    fetchViews,
     addRemoveFavorite,
     listNewProperty,
+    incrementViewCount,
     updateProperty,
     deleteProperty,
     clearError,

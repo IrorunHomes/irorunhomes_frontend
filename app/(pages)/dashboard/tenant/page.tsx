@@ -9,7 +9,7 @@ import { Property, ApartmentType, PropertyType } from '../../../types/property'
 
 export default function TenantDashboard() {
   const router = useRouter()
-  const { properties, fetchProperties, loadingProperties } = useProperty()
+  const { properties, fetchProperties, loadingProperties, addRemoveFavorite } = useProperty()
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
@@ -30,9 +30,8 @@ export default function TenantDashboard() {
   }
 
   // Handle favorite click
-  const handleFavoriteClick = (propertyId: string, isCurrentlyFavorite: boolean) => {
-    console.log(`Favorite clicked for property ${propertyId}`)
-    // Add your favorite logic here
+  const handleFavoriteClick = async (id: string, isCurrentlyFavorite: boolean) => {
+    await addRemoveFavorite(id, isCurrentlyFavorite)
   }
 
   // Fetch properties on mount
@@ -45,10 +44,20 @@ export default function TenantDashboard() {
     loadProperties()
   }, [fetchProperties])
 
-  // Use useMemo to memoize available properties
+  // Helper function to sort properties by date (latest first)
+  const sortPropertiesByDate = (properties: Property[]): Property[] => {
+    return [...properties].sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.listedDate || 0).getTime()
+      const dateB = new Date(b.createdAt || b.listedDate || 0).getTime()
+      return dateB - dateA // Newest first
+    })
+  }
+
+  // Use useMemo to memoize available properties - SORTED BY DATE (LATEST FIRST)
   const availableProperties = useMemo(() => {
     if (!properties || properties.length === 0) return []
-    return properties.filter(p => p.status === 'available' || p.status === 'rented')
+    const filtered = properties.filter(p => p.status === 'available' || p.status === 'rented')
+    return sortPropertiesByDate(filtered)
   }, [properties])
 
   // Apply filters
@@ -98,7 +107,8 @@ export default function TenantDashboard() {
       filtered = filtered.filter(p => (p.price || 0) <= parseInt(priceRange.max))
     }
 
-    setFilteredProperties(filtered)
+    // Apply sorting after filters (latest first)
+    setFilteredProperties(sortPropertiesByDate(filtered))
     // Reset to first page when filters change
     setCurrentPage(1)
   }, [availableProperties, searchTerm, selectedPropertyFor, selectedApartmentType, selectedPropertyType, selectedBedrooms, priceRange])

@@ -15,7 +15,8 @@ import {
   QuestionMarkCircleIcon,
   CheckCircleIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  HeartIcon
 } from '@heroicons/react/24/outline'
 
 interface SidebarProps {
@@ -50,6 +51,14 @@ const menuItems: MenuItem[] = [
       { id: 'active-leases', label: 'Active Leases', icon: DocumentCheckIcon, path: '/dashboard/tenant/active-lease' },
     ]
   },
+
+    { 
+    id: 'favourites', 
+    label: 'Favourites', 
+    icon: HeartIcon,
+    path: '/dashboard/tenant/favourites',
+  },
+
   { 
     id: 'settings', 
     label: 'Settings', 
@@ -271,7 +280,10 @@ export default function TenantSidebar({ onTabChange }: SidebarProps) {
           <div className="text-center">
             <p className="text-xs text-white/70">v1.0.0 • Tenant Panel</p>
             <p className="text-[10px] text-white/50 mt-2">
-              © {new Date().getFullYear()} Irorun Homes
+              © {new Date().getFullYear()} Irorun Vista Realty Solution LTD. All rights reserved.
+            </p>
+            <p>
+              Powered by <a href="https://quiqerr.com" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">Quiqerr Tech Nigeria</a>
             </p>
           </div>
         </div>

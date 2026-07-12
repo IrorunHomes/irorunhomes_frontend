@@ -13,17 +13,24 @@ export default function PropertiesPage() {
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([])
   const [activeFilters, setActiveFilters] = useState<SearchFilters | null>(null)
 
-    // Fetch properties on mount
-    useEffect(() => {
-      const loadProperties = async () => {
-        await fetchProperties()
-      }
-      loadProperties()
-    }, [])
-
-  // Initialize with all available properties
+  // Fetch properties on mount
   useEffect(() => {
-    const availableProps = properties.filter(p => p.propertyFor === 'rent' || p.status === 'rented')
+    const loadProperties = async () => {
+      await fetchProperties()
+    }
+    loadProperties()
+  }, [])
+
+  // Initialize with all available properties - SORTED BY DATE (LATEST FIRST)
+  useEffect(() => {
+    const availableProps = properties
+      .filter(p => p.propertyFor === 'rent' || p.status === 'rented')
+      .sort((a, b) => {
+        // Sort by createdAt date - latest first
+        const dateA = new Date(a.createdAt || a.listedDate || 0).getTime()
+        const dateB = new Date(b.createdAt || b.listedDate || 0).getTime()
+        return dateB - dateA // Descending order (newest first)
+      })
     setFilteredProperties(availableProps)
   }, [properties])
 
@@ -55,6 +62,13 @@ export default function PropertiesPage() {
     if (filters.bedrooms !== 'all') {
       filtered = filtered.filter(p => p.features.bedrooms >= Number(filters.bedrooms!))
     }
+    
+    // SORT filtered results by date (latest first)
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.listedDate || 0).getTime()
+      const dateB = new Date(b.createdAt || b.listedDate || 0).getTime()
+      return dateB - dateA // Newest first
+    })
     
     setFilteredProperties(filtered)
     setActiveFilters(filters)
