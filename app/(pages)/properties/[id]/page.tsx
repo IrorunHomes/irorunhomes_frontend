@@ -615,7 +615,8 @@ export function PropertyDetailContent() {
                   <span className="font-medium capitalize">{property.status}</span>
                 </div>
                 <p className="mt-3 text-sm text-gray-600">
-                  {property.status === 'available' && 'This property is currently available for rental.'}
+                  {property.status === 'available' && 'This property is currently available'}
+                  {property.status === 'bought' && 'This property has been sold.'}
                   {property.status === 'rented' && 'This property has been rented.'}
                   {property.status === 'pending' && 'This property has pending rental requests.'}
                   {property.status === 'maintenance' && 'This property is under maintenance.'}
