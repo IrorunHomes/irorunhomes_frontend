@@ -250,7 +250,7 @@ export default function TenantDashboard() {
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-emerald-600 to-green-700 rounded-2xl p-6 text-white">
           <h1 className="text-2xl font-bold mb-2">Welcome to Your Dashboard</h1>
-          <p className="text-emerald-100">Browse and discover verified properties available for rent</p>
+          <p className="text-emerald-100">Browse and discover verified properties available</p>
         </div>
 
         {/* Search Section */}
